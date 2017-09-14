@@ -166,40 +166,38 @@ bool areAllTermsFoundInFile(char *filename, searchTerms_t *searchTerms)
 {
     char buffer[MAX_DATA];
     int termsFoundCnt = 0;
-    bool *termsFound = malloc(sizeof(bool) * searchTerms->count);
+    bool doesFileMatch = false;
     FILE *fd = fopen(filename, "r");
     
-    check_mem(termsFound);
     check(fd, "Failed to open file %s", filename);
     check(searchTerms->count != 0, "Count of terms should be positive");
 
-    memset(termsFound, false, sizeof(bool) * searchTerms->count);
-    
     log_debug("Checking file %s", filename);
-    while (fgets(buffer, MAX_DATA, fd) != NULL)
+    while (!doesFileMatch && fgets(buffer, MAX_DATA, fd) != NULL)
     {
+        termsFoundCnt = 0;
         for (int i = 0; i < searchTerms->count; ++i)
         {
             // substring
-            if (strstr(buffer, searchTerms->terms[i]) != NULL &&
-                termsFound[i] == false)
+            if (strcasestr(buffer, searchTerms->terms[i]) != NULL)
             {
                 log_debug("term %s found in %s", searchTerms->terms[i], filename);
-
-                termsFound[i] = true;
                 termsFoundCnt++;
             }
         }
+
+        if (termsFoundCnt == searchTerms->count)
+        {
+            doesFileMatch = true;
+        }
     }
 
-    free(termsFound);
     fclose(fd);
 
-    log_debug("returned %d", termsFoundCnt == searchTerms->count);
-    return termsFoundCnt == searchTerms->count;
+    log_debug("returned %d", doesFileMatch); 
+    return doesFileMatch;
 
 error:
-    if (termsFound) free(termsFound);
     if (fd) fclose(fd);
     return false;
 }
@@ -207,14 +205,14 @@ error:
 bool isAtLeastOneTermFoundInFile(char *filename, searchTerms_t *searchTerms)
 {
     char buffer[MAX_DATA];
-    bool isTermFound = false;
+    bool doesFileMatch = false;
     FILE *fd = fopen(filename, "r");
     check(fd, "Failed to open file %s", filename);
     
     check(searchTerms->count != 0, "Count of terms should be positive");
 
     log_debug("Checking file %s", filename);
-    while (fgets(buffer, MAX_DATA, fd) != NULL)
+    while (!doesFileMatch && fgets(buffer, MAX_DATA, fd) != NULL)
     {
         for (int i = 0; i < searchTerms->count; ++i)
         {
@@ -222,13 +220,14 @@ bool isAtLeastOneTermFoundInFile(char *filename, searchTerms_t *searchTerms)
             if (strstr(buffer, searchTerms->terms[i]) != NULL)
             {
                 log_debug("term %s found in %s", searchTerms->terms[i], filename);
-                isTermFound = true;
+                doesFileMatch = true;
+                break;
             }
         }
     }
 
-    log_debug("returned %d", isTermFound);
-    return isTermFound;
+    log_debug("returned %d", doesFileMatch);
+    return doesFileMatch;
 
 error:
     return false;
