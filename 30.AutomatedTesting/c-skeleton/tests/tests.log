@@ -1,0 +1,108 @@
+./tests/runtests.sh: 7: ./tests/runtests.sh: ./tests/libex29_tests: Permission denied
+./tests/libex29_tests: 17: ./tests/libex29_tests: Syntax error: word unexpected (expecting ")")
+./tests/libex29_tests: 17: ./tests/libex29_tests: Syntax error: word unexpected (expecting ")")
+./tests/runtests.sh: 7: ./tests/runtests.sh: ./tests/libex29_tests: Permission denied
+DEBUG tests/libex29_tests.c:73: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:65: 
+----- test_dlopen
+[ERROR] (tests/libex29_tests.c:28: errno: None) Failed to open the library to test.
+DEBUG tests/libex29_tests.c:73: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:65: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:66: 
+----- test_functions
+DEBUG tests/libex29_tests.c:67: 
+----- test_failures
+DEBUG tests/libex29_tests.c:68: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:55: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:47: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:48: 
+----- test_functions
+DEBUG tests/libex29_tests.c:49: 
+----- test_failures
+DEBUG tests/libex29_tests.c:50: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:66: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:58: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:59: 
+----- test_functions
+DEBUG tests/libex29_tests.c:60: 
+----- test_failures
+DEBUG tests/libex29_tests.c:61: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:66: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:58: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:59: 
+----- test_functions
+DEBUG tests/libex29_tests.c:60: 
+----- test_failures
+DEBUG tests/libex29_tests.c:61: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:66: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:58: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:59: 
+----- test_functions
+[ERROR] (tests/libex29_tests.c:30: errno: None) Did not find uppercase function in the library build/libex29.so: build/libex29.so: undefined symbol: uppercas
+DEBUG tests/libex29_tests.c:82: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:74: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:75: 
+----- test_functions
+DEBUG tests/libex29_tests.c:30: SIZEOF func_names: 3
+DEBUG tests/libex29_tests.c:76: 
+----- test_failures
+DEBUG tests/libex29_tests.c:77: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:82: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:74: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:75: 
+----- test_functions
+DEBUG tests/libex29_tests.c:30: SIZEOF func_names: 3
+DEBUG tests/libex29_tests.c:76: 
+----- test_failures
+DEBUG tests/libex29_tests.c:77: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:82: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:74: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:75: 
+----- test_functions
+DEBUG tests/libex29_tests.c:30: SIZEOF func_names: 3
+DEBUG tests/libex29_tests.c:76: 
+----- test_failures
+DEBUG tests/libex29_tests.c:77: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:83: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:75: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:76: 
+----- test_functions
+DEBUG tests/libex29_tests.c:31: SIZEOF func_names: 3
+DEBUG tests/libex29_tests.c:77: 
+----- test_failures
+DEBUG tests/libex29_tests.c:78: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:83: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:75: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:76: 
+----- test_functions
+DEBUG tests/libex29_tests.c:77: 
+----- test_failures
+DEBUG tests/libex29_tests.c:78: 
+----- test_dlclose
+DEBUG tests/libex29_tests.c:83: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:75: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:76: 
+----- test_functions
+DEBUG tests/libex29_tests.c:77: 
+----- test_failures
+DEBUG tests/libex29_tests.c:78: 
+----- test_dlclose
