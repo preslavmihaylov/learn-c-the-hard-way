@@ -1,0 +1,17 @@
+./tests/runtests.sh: 7: ./tests/runtests.sh: ./tests/libex29_tests: Permission denied
+./tests/libex29_tests: 17: ./tests/libex29_tests: Syntax error: word unexpected (expecting ")")
+./tests/libex29_tests: 17: ./tests/libex29_tests: Syntax error: word unexpected (expecting ")")
+./tests/runtests.sh: 7: ./tests/runtests.sh: ./tests/libex29_tests: Permission denied
+DEBUG tests/libex29_tests.c:73: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:65: 
+----- test_dlopen
+[ERROR] (tests/libex29_tests.c:28: errno: None) Failed to open the library to test.
+DEBUG tests/libex29_tests.c:73: ----- RUNNING: ./tests/libex29_tests
+DEBUG tests/libex29_tests.c:65: 
+----- test_dlopen
+DEBUG tests/libex29_tests.c:66: 
+----- test_functions
+DEBUG tests/libex29_tests.c:67: 
+----- test_failures
+DEBUG tests/libex29_tests.c:68: 
+----- test_dlclose
