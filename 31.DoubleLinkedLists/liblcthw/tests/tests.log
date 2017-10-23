@@ -1,0 +1,25 @@
+DEBUG tests/list_tests.c:88: ----- RUNNING: ./tests/list_tests
+DEBUG tests/list_tests.c:72: 
+----- test_list_create
+DEBUG tests/list_tests.c:73: 
+----- test_list_destroy
+DEBUG tests/list_tests.c:74: 
+----- test_list_clear
+DEBUG tests/list_tests.c:75: 
+----- test_list_clear_destroy
+DEBUG tests/list_tests.c:76: 
+----- test_list_count
+DEBUG tests/list_tests.c:77: 
+----- test_list_first
+DEBUG tests/list_tests.c:78: 
+----- test_list_last
+DEBUG tests/list_tests.c:79: 
+----- test_list_push
+DEBUG tests/list_tests.c:80: 
+----- test_list_pop
+DEBUG tests/list_tests.c:81: 
+----- test_list_unshift
+DEBUG tests/list_tests.c:82: 
+----- test_list_shift
+DEBUG tests/list_tests.c:83: 
+----- test_list_remove
