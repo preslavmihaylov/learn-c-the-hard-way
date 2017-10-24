@@ -33,7 +33,7 @@ $(DLIB_TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
 
 $(TESTS_DIR)/%: $(TESTS_DIR)/%.c
-	$(CC) $(CFLAGS) $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@ $(LIBS)
 
 .PHONY: tests
 tests: $(TESTS) 

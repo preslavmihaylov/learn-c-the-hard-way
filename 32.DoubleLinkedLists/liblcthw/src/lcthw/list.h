@@ -31,4 +31,9 @@ void *List_shift(List *list);
 
 void *List_remove(List *list, ListNode *node);
 
+#define LIST_FOREACH(curr, list) \
+    for (ListNode *_node = list->first; \
+         _node != NULL; \
+         curr = _node = _node->next)
+
 #endif // lcthw_List_h

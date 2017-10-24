@@ -2,25 +2,11 @@
 #include <list.h>
 #include <assert.h>
 
-//static List *list = NULL;
-
 char *test_list_create()
 {
-	return NULL;
-}
+    List *list = List_create();
+    mu_assert(list != NULL, "List_create didn't create list");
 
-char *test_list_destroy()
-{
-	return NULL;
-}
-
-char *test_list_clear()
-{
-	return NULL;
-}
-
-char *test_list_clear_destroy()
-{
 	return NULL;
 }
 
@@ -41,7 +27,29 @@ char *test_list_last()
 
 char *test_list_push()
 {
-	return NULL;
+    void *firstElement = (void *)5;
+    void *secondElement = (void *)6;
+
+    List *list = List_create();
+
+    List_push(list, firstElement);
+    
+    mu_assert(list->count == 1, "Count not incremented upon push");
+    
+    mu_assert(list->first->value == firstElement, 
+            "list_push 1 did not modify first element");
+    mu_assert(list->last->value == firstElement, 
+            "list_push 1 did not modify last element");
+
+    List_push(list, secondElement);
+
+    mu_assert(list->first->value == firstElement, 
+            "list_push 2 modified first element");
+    mu_assert(list->last->value == secondElement, 
+            "list_push 2 did not modify second element");
+    // TODO: FINISH
+
+    return NULL;
 }
 
 char *test_list_pop()
@@ -64,15 +72,16 @@ char *test_list_remove()
 	return NULL;
 }
 
+char *test_list_clear_destroy()
+{
+	return NULL;
+}
 
 char *all_tests()
 {
     mu_suite_start();
     
     mu_run_test(test_list_create);
-    mu_run_test(test_list_destroy);
-    mu_run_test(test_list_clear);
-    mu_run_test(test_list_clear_destroy);
     mu_run_test(test_list_count);
     mu_run_test(test_list_first);
     mu_run_test(test_list_last);
@@ -81,6 +90,7 @@ char *all_tests()
     mu_run_test(test_list_unshift);
     mu_run_test(test_list_shift);
     mu_run_test(test_list_remove);
+    mu_run_test(test_list_clear_destroy);
 
     return NULL;
 }
