@@ -5,7 +5,7 @@ TESTS_DIR=./tests
 
 CC=gcc
 INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR) 
-CFLAGS=-g -O2 -Wall -Wextra -Werror -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS)
 
 SOURCES=$(wildcard src/**/*.c src/*.c)

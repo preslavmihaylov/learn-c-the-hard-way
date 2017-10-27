@@ -13,7 +13,9 @@ char *test_list_create()
 char *test_list_count()
 {
 	List *list = List_create();
-	
+
+	mu_assert(List_count(NULL) == 0, "List_count of NULL did not return 0");
+
 	list->count = 0;
 	mu_assert(List_count(list) == 0, "List_count of 0 did not return 0");
 	
@@ -27,7 +29,9 @@ char *test_list_first()
 {
 	List *list = List_create();
 	
-	list->first = NULL;
+	mu_assert(List_first(NULL) == NULL, "List_first of NULL did not return NULL");
+	
+    list->first = NULL;
 	mu_assert(List_first(list) == NULL, "List_first of NULL did not return NULL");
 	
 	list->first = malloc(sizeof(ListNode));
@@ -40,7 +44,9 @@ char *test_list_first()
 char *test_list_last()
 {
 	List *list = List_create();
-	
+
+	mu_assert(List_last(NULL) == NULL, "List_last of NULL did not return NULL");
+
 	list->last = NULL;
 	mu_assert(List_last(list) == NULL, "List_last of NULL did not return NULL");
 	
@@ -58,7 +64,13 @@ char *test_list_push()
     void *thirdElement = (void *)7;
 
     List *list = List_create();
+    
+    List_push(NULL, NULL);
+    mu_assert(list->first == NULL, "List_push of null did not return null");
 
+    List_push(list, NULL);
+    mu_assert(list->first == NULL, "List_push of null did not return null");
+    
     List_push(list, firstElement);
     
     mu_assert(list->count == 1, "Count not incremented upon push");
@@ -106,13 +118,17 @@ char *test_list_push()
 
 char *test_list_pop()
 {
+    void *data;
     void *firstElement = (void *)5;
     void *secondElement = (void *)6;
     void *thirdElement = (void *)7;
 	
     List *list = List_create();
-	
-	void *data = List_pop(list);
+
+    data = List_pop(NULL);
+    mu_assert(data == NULL, "List_pop of NULL did not return NULL");
+
+	data = List_pop(list);
 	mu_assert(data == NULL, "List_pop of NULL did not return NULL");
 	
 	List_push(list, firstElement);
@@ -156,7 +172,13 @@ char *test_list_unshift()
 	
     List *list = List_create();
 	
-	List_unshift(list, firstElement);
+    List_unshift(NULL, NULL);
+    mu_assert(list->first == NULL, "List_unshift of null did not return null");
+
+    List_unshift(list, NULL);
+    mu_assert(list->first == NULL, "List_unshift of null did not return null");
+	
+    List_unshift(list, firstElement);
 	mu_assert(list->first != NULL, "List_unshift with no elements did not change first node");
 	mu_assert(list->first->value == firstElement, "List_unshift with no elements did not add element");
 	mu_assert(list->last != NULL, "List_unshift with no elements did not change last node");
@@ -183,18 +205,150 @@ char *test_list_unshift()
 	mu_assert(list->last->prev->next == list->last, "List_unshift with two elements changed last node's prev's next node");
 	mu_assert(list->last->prev->prev == list->first, "List_unshift with two elements changed last node's prev's prev node");
 	
-	
 	return NULL;
 }
 
 char *test_list_shift()
 {
-	return NULL;
+    List *list = List_create();
+    void *data;
+    void *firstElement = (void *)5;
+    void *secondElement = (void *)6;
+	
+    data = List_shift(NULL);
+    mu_assert(data == NULL, "List_shift of null did not return null");
+    
+    data = List_shift(list);
+    mu_assert(data == NULL, "List_shift of empty list did not return null");
+    
+    list = List_create();
+    List_push(list, firstElement);
+    data = List_shift(list);
+    mu_assert(data == firstElement, "List_shift of one element did not return first element");
+    mu_assert(list->first == NULL, "List_shift of one element did not make first element NULL");
+    mu_assert(list->last == NULL, "List_shift of one element did not make last element NULL");
+    mu_assert(list->count == 0, "List_shift of one element did not change count");
+
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    data = List_shift(list);
+    mu_assert(data == firstElement, "List_shift of two elements did not return first element");
+    mu_assert(list->first == list->last, "List_shift of two elements did not make first element last");
+    mu_assert(list->first->value == secondElement, "List_shift of two elements "
+            "modified first element's value");
+    mu_assert(list->count == 1, "List_shift of two elements did not change count");
+
+    return NULL;
 }
 
 char *test_list_remove()
 {
-	return NULL;
+    List *list = List_create();
+    void *data;
+    void *firstElement = (void *)5;
+    void *secondElement = (void *)6;
+    void *thirdElement = (void *)7;
+
+    data = List_remove(NULL, NULL);
+    mu_assert(data == NULL, "List did not return null when passed null");
+    
+    data = List_remove(list, NULL);
+    mu_assert(data == NULL, "List did not return null when passed null");
+	
+    list = List_create();
+    List_push(list, firstElement);
+    data = List_remove(list, list->first);
+    
+    mu_assert(data == firstElement, "List_remove with one element did not return first element");
+    mu_assert(list->count == 0, "List did not decrement count when element was removed");
+    mu_assert(list->first == NULL, "List_remove with one element did not remove first node");
+    mu_assert(list->last == NULL, "List_remove with one element did not remove last node");
+    
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    data = List_remove(list, list->first);
+    
+    mu_assert(list->first != NULL, "List_remove(first) with two elements returns null");
+    mu_assert(data == firstElement, "List_remove(first) with two elements did not return correct value");
+    mu_assert(list->first->prev == NULL, "List_remove(first) with two elements did not delete prev node");
+    mu_assert(list->first->next == NULL, "List_remove(first) with two elements did not delete next node");
+    mu_assert(list->first == list->last, "List_remove(first) with two elements "
+            "did not make first and last node equal");
+   
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    data = List_remove(list, list->last);
+
+    mu_assert(data == secondElement, "List_remove(last) with two elements "
+            "did not return correct element");
+    mu_assert(list->first == list->last, "List_remove(last) with two elements "
+            "did not make first and last equal");
+    mu_assert(list->last->value == firstElement, "List_remove(last) with two elements "
+            "did not keep correct element");
+    mu_assert(list->last->prev == NULL, "List_remove(last) with two element "
+            "did not remove prev node");
+    mu_assert(list->last->next == NULL, "List_remove(last) with two element "
+            "did not remove next node");
+
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    List_push(list, thirdElement);
+    data = List_remove(list, list->first->next);
+   
+    mu_assert(data == secondElement, "List_remove(middle) with three elements "
+            "did not return corrent element");
+    mu_assert(list->first->value == firstElement, "List_remove(middle) with three elements "
+            "modified first element");
+    mu_assert(list->last->value == thirdElement, "List_remove(middle) with three elements "
+            "modified last element");
+    mu_assert(list->first->next == list->last, "List_remove(middle) with three elements "
+            "did not change first node's next node");
+    mu_assert(list->last->prev == list->first, "List_remove(middle) with three elements "
+            "did not change last node's prev node");
+
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    List_push(list, thirdElement);
+    data = List_remove(list, list->first);
+
+    mu_assert(list->first->value == secondElement, "List_remove(first) with three elements "
+            "did not change first node's value");
+    mu_assert(list->last->value == thirdElement, "List_remove(first) with three elements "
+            "modified last node's value");
+    mu_assert(list->first->prev == NULL, "List_remove(first) with three elements "
+            "did not change first node's prev node");
+    mu_assert(list->first->next == list->last, "List_remove(first) with three elements "
+            "did not change first node's next node");
+    mu_assert(list->last->prev == list->first, "List_remove(first) with three elements "
+            "modified last node's prev node");
+    mu_assert(list->last->next == NULL, "List_remove(first) with three elements "
+            "modified last node's next node");
+    
+    list = List_create();
+    List_push(list, firstElement);
+    List_push(list, secondElement);
+    List_push(list, thirdElement);
+    data = List_remove(list, list->last);
+
+    mu_assert(list->first->value == firstElement, "List_remove(last) with three elements "
+            "did not change first node's value");
+    mu_assert(list->last->value == secondElement, "List_remove(last) with three elements "
+            "modified last node's value");
+    mu_assert(list->first->prev == NULL, "List_remove(first) with three elements "
+            "changed first node's prev node");
+    mu_assert(list->first->next == list->last, "List_remove(first) with three elements "
+            "did not change first node's next node");
+    mu_assert(list->last->prev == list->first, "List_remove(first) with three elements "
+            "did not change last node's prev node");
+    mu_assert(list->last->next == NULL, "List_remove(first) with three elements "
+            "modified last node's next node");
+    
+    return NULL;
 }
 
 char *test_list_clear_destroy()

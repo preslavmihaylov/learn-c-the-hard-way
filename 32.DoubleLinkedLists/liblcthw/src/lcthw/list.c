@@ -4,6 +4,7 @@
 #include <dbg.h>
 
 static ListNode *List_createNode();
+static void List_freeNode(ListNode *node);
 
 List *List_create()
 {
@@ -41,33 +42,31 @@ void List_clear_destroy(List *list)
 
 int List_count(List *list)
 {
+    if (!list) return 0;
+
     return list->count;
 }
 
 void *List_first(List *list)
 {
-    if (list->first)
-	{
-		assert(list->first->value != NULL);
-        return list->first->value;
-	}
-	
-	return NULL;
+    if (!list || !list->first) return NULL;
+    assert(list->first->value != NULL);
+    
+    return list->first->value;
 }
 
 void *List_last(List *list)
 {
-	if (list->last)
-	{
-		assert(list->last->value != NULL);
-		return list->last->value;
-	}
-        
-    return NULL;
+    if (!list || !list->last) return NULL;
+    assert(list->last->value != NULL);
+    
+    return list->last->value;    
 }
 
 void List_push(List *list, void *value)
 {
+    if (!list || !value) return;
+
     ListNode *node = List_createNode();
     check_mem(node);
 
@@ -96,8 +95,7 @@ error:
 
 void *List_pop(List *list)
 {
-	if (list->count == 0)
-		return NULL;
+	if (!list || list->count == 0) return NULL;
 	
 	ListNode *node = list->last;
 	void *data = node->value;
@@ -117,6 +115,8 @@ void *List_pop(List *list)
 
 void List_unshift(List *list, void *value)
 {
+    if (!list || !value) return;
+
 	ListNode *node = List_createNode();
 	check_mem(node);
 
@@ -141,12 +141,40 @@ error:
 
 void *List_shift(List *list)
 {
-    return NULL;
+    if (!list) return NULL;
+
+    return List_remove(list, list->first);
 }
 
 void *List_remove(List *list, ListNode *node)
 {
-    return NULL;
+    if (list == NULL || node == NULL || list->count == 0) return NULL;
+    
+    if (node->prev)
+    {
+        node->prev->next = node->next;
+    }
+    else
+    {
+        assert(node == list->first);
+        list->first = node->next;
+    }
+
+    if (node->next)
+    {
+        node->next->prev = node->prev;
+    }
+    else
+    {
+        assert(node == list->last);
+        list->last = node->prev;
+    }
+
+    void *data = node->value;
+    List_freeNode(node);
+    list->count--;
+
+    return data;
 }
 
 static ListNode *List_createNode()
@@ -157,4 +185,11 @@ static ListNode *List_createNode()
 	node->value = NULL;
 	
 	return node;
+}
+
+static void List_freeNode(ListNode *node)
+{
+    assert(node != NULL);
+
+    free(node);
 }
