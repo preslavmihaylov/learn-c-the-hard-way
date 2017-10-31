@@ -351,8 +351,15 @@ char *test_list_remove()
     return NULL;
 }
 
-char *test_list_clear_destroy()
+char *test_list_destroy()
 {
+	List *list = List_create();
+	List_push(list, (void *)5);
+	List_push(list, (void *)6);
+	List_push(list, (void *)7);
+	
+	List_destroy(list);
+
 	return NULL;
 }
 
@@ -369,7 +376,7 @@ char *all_tests()
     mu_run_test(test_list_unshift);
     mu_run_test(test_list_shift);
     mu_run_test(test_list_remove);
-    mu_run_test(test_list_clear_destroy);
+    mu_run_test(test_list_destroy);
 
     return NULL;
 }

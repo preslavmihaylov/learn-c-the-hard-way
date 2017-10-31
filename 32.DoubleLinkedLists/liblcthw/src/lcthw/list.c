@@ -4,7 +4,6 @@
 #include <dbg.h>
 
 static ListNode *List_createNode();
-static void List_freeNode(ListNode *node);
 
 List *List_create()
 {
@@ -18,20 +17,18 @@ List *List_create()
 
 void List_destroy(List *list)
 {
-    // TODO:
-    /*
-    for (ListNode *node = list->first; node != NULL; node = node->next)
+	ListNode *node;
+    for (node = list->first; node != NULL; node = node->next)
         free(node->prev);
-    
-    if (list->last)
-        free(list->last);
+
+    free(node);
     free(list);
-    */
 }
 
 void List_clear(List *list)
 {
-    // TODO:
+    for (ListNode *node = list->first; node != NULL; node = node->next)
+        free(node->value);
 }
 
 void List_clear_destroy(List *list)
@@ -95,22 +92,9 @@ error:
 
 void *List_pop(List *list)
 {
-	if (!list || list->count == 0) return NULL;
+	if (!list) return NULL;
 	
-	ListNode *node = list->last;
-	void *data = node->value;
-	
-	list->last = list->last->prev;
-	
-	if (list->last)
-		list->last->next = NULL;
-	else
-		list->first = NULL;
-	
-	list->count--;
-	free(node);
-	
-	return data;
+	return List_remove(list, list->last);	
 }
 
 void List_unshift(List *list, void *value)
@@ -170,9 +154,9 @@ void *List_remove(List *list, ListNode *node)
         list->last = node->prev;
     }
 
-    void *data = node->value;
-    List_freeNode(node);
     list->count--;
+    void *data = node->value;
+	free(node);    
 
     return data;
 }
@@ -185,11 +169,4 @@ static ListNode *List_createNode()
 	node->value = NULL;
 	
 	return node;
-}
-
-static void List_freeNode(ListNode *node)
-{
-    assert(node != NULL);
-
-    free(node);
 }
