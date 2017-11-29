@@ -1,6 +1,8 @@
 #ifndef lcthw_List_h
 #define lcthw_List_h
 
+#include <stdlib.h>
+
 struct ListNode;
 typedef struct ListNode {
     struct ListNode *next;
