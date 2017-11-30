@@ -1,0 +1,4 @@
+*.a
+*.so
+*.o
+tests.log
