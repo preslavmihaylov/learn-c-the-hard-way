@@ -5,7 +5,7 @@ TESTS_DIR=./tests
 
 CC=gcc
 INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR) 
-CFLAGS=-g -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
+CFLAGS=-g -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS)
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
@@ -47,3 +47,4 @@ clean:
 	rm -rf $(BUILD_DIR) || true
 	rm $(OBJECTS) || true
 	rm $(TESTS) || true
+	rm tests/tests.log || true
