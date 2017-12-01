@@ -80,12 +80,13 @@ char *test_merge_sort()
 	List *words = create_words();
 
 	// should word on a list that needs sorting
+	print_words(words, "WORDS: ");
 	List *res = List_merge_sort(words, (List_compare)strcmp);
-	print_words(words, "MERGE_SORT 1: ");
+	print_words(res, "MERGE_SORT 1: ");
 	mu_assert(is_sorted(res), "Words are not sorted after merge sort");
 
 	List *res2 = List_merge_sort(res, (List_compare)strcmp);
-	print_words(words, "MERGE_SORT 2: ");
+	print_words(res2, "MERGE_SORT 2: ");
 	mu_assert(is_sorted(res2), "Should still be sorted after merge sort");
 
 	List_destroy(res2);
