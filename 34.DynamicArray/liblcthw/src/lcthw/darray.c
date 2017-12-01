@@ -1,5 +1,7 @@
 #include <lcthw/darray.h>
 
+static int DArray_resize(DArray *array, size_t new_capacity);
+
 DArray *DArray_create(size_t element_size, size_t initial_capacity)
 {
     DArray *array = malloc(sizeof(DArray));
@@ -72,16 +74,37 @@ void DArray_free(void *element)
     free(element);
 }
 
-size_t DArray_expand(DArray *array)
+int DArray_expand(DArray *array)
 {
-    // TODO
+    check(array != NULL, "Array cannot be NULL");
+	check(array->contents != NULL, "Array contents cannot be NULL");
+
+	size_t old_capacity = array->capacity;
+	size_t new_size = array->capacity + array->expand_rate;
+
+	int rc = DArray_resize(array, new_size);
+	check(rc == 0, "Failed to resize array to %lu", new_size);
+
+	// init unused memory to 0
+	memset(array->contents + old_capacity, 0, array->expand_rate + 1);
     return 0;
+
+error:
+	return -1;
 }
 
 size_t DArray_contract(DArray *array)
 {
-    // TODO
-    return 0;
+    check(array != NULL, "Array cannot be NULL");
+	check(array->contents != NULL, "Array contents cannot be NULL");
+	
+	size_t new_size = array->count < array->expand_rate ? 
+		array->expand_rate : array->count;
+
+   	return DArray_resize(array, new_size + 1); 
+
+error:
+	return -1;
 }
 
 int DArray_push(DArray *array, void *el)
@@ -90,9 +113,7 @@ int DArray_push(DArray *array, void *el)
 	check(array->contents != NULL, "Array contents cannot be NULL");
 	
 	if (array->count >= array->capacity)
-	{
-		// TODO: Expand
-	}
+		DArray_expand(array);
 
     array->contents[array->count++] = el;
 
@@ -139,7 +160,12 @@ void DArray_set(DArray *array, size_t i, void *el)
 {
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
-	check(i < array->count, "index out of range");
+	check(i < array->capacity, "index out of range");
+	
+	if (i >= array->count)
+	{
+		array->count = i + 1;
+	}
 
 	array->contents[i] = el;
 
@@ -200,3 +226,22 @@ size_t DArray_capacity(DArray *array)
 error:
     return 0;
 }
+
+static int DArray_resize(DArray *array, size_t new_capacity)
+{
+	check(new_capacity > 0, "new_capacity should be greater than 0");
+
+    array->capacity = new_capacity;
+	
+	void *new_contents = realloc(
+		array->contents, new_capacity * sizeof(array->element_size));
+	check_mem(new_contents);
+	
+	array->contents = new_contents;
+
+    return 0;
+
+error:
+	return -1;
+}
+

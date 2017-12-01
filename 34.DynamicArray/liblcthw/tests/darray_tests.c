@@ -76,16 +76,16 @@ char *test_expand_contract()
     mu_assert(
 		(unsigned int)array->capacity == old_capacity + array->expand_rate, 
         "wrong size after expand");
-
-    DArray_contract(array);
+    
+	DArray_contract(array);
     mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
 
     DArray_contract(array);
     mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
-        
-    return NULL;
+    
+	return NULL;
 }
 
 char *test_push_pop()

@@ -21,7 +21,7 @@ void DArray_clear(DArray *array);
 void DArray_clear_destroy(DArray *array);
 void *DArray_new(DArray *array);
 void DArray_free(void *element);
-size_t DArray_expand(DArray *array);
+int DArray_expand(DArray *array);
 size_t DArray_contract(DArray *array);
 int DArray_push(DArray *array, void *el);
 void *DArray_pop(DArray *array);
