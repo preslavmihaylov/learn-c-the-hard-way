@@ -12,7 +12,8 @@ char *test_create()
     mu_assert(array->contents != NULL, "contents are wrong in darray");
     mu_assert(array->count == 0, "end isn't at the right spot");
     mu_assert(array->element_size == sizeof(int), "element size is wrong.");
-    mu_assert(array->max == 100, "wrong max length on initial size");
+    mu_assert(array->capacity == 100, 
+		"wrong capacity on initialise");
 
     return NULL;
 }
@@ -70,17 +71,18 @@ char *test_remove()
 
 char *test_expand_contract()
 {
-    int old_max = array->max;
+    int old_capacity = array->capacity;
     DArray_expand(array);
-    mu_assert((unsigned int)array->max == old_max + array->expand_rate, 
+    mu_assert(
+		(unsigned int)array->capacity == old_capacity + array->expand_rate, 
         "wrong size after expand");
 
     DArray_contract(array);
-    mu_assert((unsigned int)array->max == array->expand_rate + 1,
+    mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
 
     DArray_contract(array);
-    mu_assert((unsigned int)array->max == array->expand_rate + 1,
+    mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
         
     return NULL;
@@ -96,7 +98,7 @@ char *test_push_pop()
         DArray_push(array, val);
     }
 
-    mu_assert(array->max == 1201, "Wrong max size");
+    mu_assert(array->capacity == 1201, "Wrong capacity size");
 
     for (i = 999; i >= 0; i--)
     {
