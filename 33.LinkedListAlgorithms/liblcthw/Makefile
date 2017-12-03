@@ -5,14 +5,14 @@ TESTS_DIR=./tests
 
 CC=gcc
 INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR) 
-CFLAGS=-g -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
+CFLAGS=-g -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -rdynamic -DNDEBUG $(INCLUDES) $(OPTFLAGS)
 LIBS=-ldl $(OPTLIBS)
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(SOURCES:%.c=%.o)
 
 TEST_SOURCES=$(wildcard $(TESTS_DIR)/*_tests.c)
-TESTS=$(patsubst %.c, %,$(TEST_SOURCES))
+TESTS=$(patsubst %.c, %.tst,$(TEST_SOURCES))
 
 SLIB_TARGET=$(BUILD_DIR)/liblcthw.a
 DLIB_TARGET=$(patsubst %.a,%.so,$(SLIB_TARGET))
@@ -32,7 +32,7 @@ $(DLIB_TARGET): $(OBJECTS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
 
-$(TESTS_DIR)/%: $(TESTS_DIR)/%.c
+$(TESTS_DIR)/%.tst: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@ $(LIBS)
 
 .PHONY: tests
@@ -47,3 +47,4 @@ clean:
 	rm -rf $(BUILD_DIR) || true
 	rm $(OBJECTS) || true
 	rm $(TESTS) || true
+	rm tests/tests.log || true
