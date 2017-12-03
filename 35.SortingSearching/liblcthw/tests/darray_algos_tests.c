@@ -8,7 +8,7 @@ int testcmp(char **a, char **b)
 
 DArray *create_words()
 {
-	DArray *result = DArray_create(1, 5);
+	DArray *result = DArray_create(sizeof(char**), 5);
 	char *words[] = { "asdfasfd", "werwar", "13234", "asdfasfd", "oioj" };
 	for (int i = 0; i < 5; ++i)
 	{
