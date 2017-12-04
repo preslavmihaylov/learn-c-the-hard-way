@@ -11,7 +11,7 @@ DArray *DArray_create(size_t element_size, size_t initial_capacity)
     check(initial_capacity > 0, 
 		"Initial capacity should be greater than 0");
 
-    array->contents = calloc(array->capacity, sizeof(void *));
+    array->contents = calloc(initial_capacity, sizeof(void *));
     check_mem(array->contents);
 
     array->count = 0;
@@ -113,7 +113,9 @@ int DArray_push(DArray *array, void *el)
 	check(array->contents != NULL, "Array contents cannot be NULL");
 	
 	if (array->count >= array->capacity)
+	{
 		DArray_expand(array);
+	}
 
     array->contents[array->count++] = el;
 
@@ -233,11 +235,9 @@ static int DArray_resize(DArray *array, size_t new_capacity)
 
     array->capacity = new_capacity;
 	
-	void *new_contents = realloc(
-		array->contents, new_capacity * sizeof(array->element_size));
-	check_mem(new_contents);
-	
-	array->contents = new_contents;
+	array->contents = realloc(
+		array->contents, new_capacity * sizeof(void*));
+	check_mem(array->contents);
 
     return 0;
 
