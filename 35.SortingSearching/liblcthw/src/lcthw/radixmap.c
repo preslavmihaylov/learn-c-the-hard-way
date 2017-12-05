@@ -1,6 +1,6 @@
 #include <lcthw/radixmap.h>
 
-RadixMap *RadixMap_create(size_t max)
+RadixMap *RadixMap_create(size_t capacity)
 {
 	// TODO:
 	return NULL;
