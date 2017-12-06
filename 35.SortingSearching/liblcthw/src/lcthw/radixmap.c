@@ -1,14 +1,31 @@
 #include <lcthw/radixmap.h>
+#include <lcthw/dbg.h>
+#include <stdlib.h>
 
 RadixMap *RadixMap_create(size_t capacity)
 {
-	// TODO:
+	check(capacity > 0, "capacity has to be greater than 0");
+	
+	RadixMap *map = malloc(sizeof(RadixMap));
+	check_mem(map);
+
+	map->contents = calloc(capacity, sizeof(RMElement));
+	map->capacity = capacity;
+	map->count = 0;	
+
+	return map;
+error:
+	RadixMap_destroy(map);
 	return NULL;
 }
 
 void RadixMap_destroy(RadixMap *map)
 {
-	// TODO:
+	if (map)
+	{
+		if (map->contents) free(map->contents);
+		free(map);
+	}
 }
 
 void RadixMap_sort(RadixMap *map)

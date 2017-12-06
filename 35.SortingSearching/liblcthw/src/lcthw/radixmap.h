@@ -17,9 +17,7 @@ typedef struct RadixMap
 {
 	size_t capacity;
 	size_t count;
-	uint32_t counter;
 	RMElement *contents;
-	RMElement *temp;
 } RadixMap;
 
 RadixMap *RadixMap_create(size_t capacity);
