@@ -69,3 +69,17 @@ error:
 	return -1;
 }
 
+static void RadixMap_radixSort(RMElement *contents, size_t count, int byte)
+{
+	if (byte < 0) return;
+
+	RadixMap_radixSort(contents, count, byte - 1);
+	RadixMap_sortByByte(contents, count, byte);
+}
+
+static void RadixMap_sortByByte(RMElement *contents, 
+								size_t count, 
+								int byte)
+{
+	// TODO:
+}
