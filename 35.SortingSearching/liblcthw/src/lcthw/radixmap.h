@@ -15,12 +15,12 @@ typedef union RMElement
 
 typedef struct RadixMap
 {
-	size_t capacity;
-	size_t count;
+	uint32_t capacity;
+	uint32_t count;
 	RMElement *contents;
 } RadixMap;
 
-RadixMap *RadixMap_create(size_t capacity);
+RadixMap *RadixMap_create(uint32_t capacity);
 void RadixMap_destroy(RadixMap *map);
 void RadixMap_sort(RadixMap *map);
 RMElement *RadixMap_find(RadixMap *map, uint32_t key);

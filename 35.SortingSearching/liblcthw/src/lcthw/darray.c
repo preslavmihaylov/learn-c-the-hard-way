@@ -1,8 +1,8 @@
 #include <lcthw/darray.h>
 
-static int DArray_resize(DArray *array, size_t new_capacity);
+static int DArray_resize(DArray *array, uint32_t new_capacity);
 
-DArray *DArray_create(size_t element_size, size_t initial_capacity)
+DArray *DArray_create(uint32_t element_size, uint32_t initial_capacity)
 {
     DArray *array = malloc(sizeof(DArray));
     check_mem(array);
@@ -41,7 +41,7 @@ void DArray_clear(DArray *array)
     check(array != NULL, "Array cannot be NULL");
     check(array->contents != NULL, "Array contents cannot be NULL");
 
-    for (size_t i = 0; i < array->count; ++i)
+    for (uint32_t i = 0; i < array->count; ++i)
     {
         DArray_free(array->contents[i]);
     }
@@ -79,11 +79,12 @@ int DArray_expand(DArray *array)
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
 
-	size_t old_capacity = array->capacity;
-	size_t new_size = array->capacity + array->expand_rate;
+	uint32_t old_capacity = array->capacity;
+
+	uint32_t new_size = array->capacity + array->expand_rate;
 
 	int rc = DArray_resize(array, new_size);
-	check(rc == 0, "Failed to resize array to %lu", new_size);
+	check(rc == 0, "Failed to resize array to %u", new_size);
 
 	// init unused memory to 0
 	memset(array->contents + old_capacity, 0, array->expand_rate + 1);
@@ -93,12 +94,12 @@ error:
 	return -1;
 }
 
-size_t DArray_contract(DArray *array)
+int DArray_contract(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
 	
-	size_t new_size = array->count < array->expand_rate ? 
+	uint32_t new_size = array->count < array->expand_rate ? 
 		array->expand_rate : array->count;
 
    	return DArray_resize(array, new_size + 1); 
@@ -143,7 +144,7 @@ error:
 	return NULL;
 }
 
-void *DArray_remove(DArray *array, size_t i)
+void *DArray_remove(DArray *array, uint32_t i)
 {
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
@@ -158,7 +159,7 @@ error:
     return NULL;
 }
 
-void DArray_set(DArray *array, size_t i, void *el)
+void DArray_set(DArray *array, uint32_t i, void *el)
 {
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
@@ -175,7 +176,7 @@ error: // fallthrough
 	return;
 }
 
-void *DArray_get(DArray *array, size_t i)
+void *DArray_get(DArray *array, uint32_t i)
 {
     check(array != NULL, "Array cannot be NULL");
 	check(array->contents != NULL, "Array contents cannot be NULL");
@@ -211,7 +212,7 @@ error:
 	return NULL;
 }
 
-size_t DArray_count(DArray *array)
+uint32_t DArray_count(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
     return array->count;
@@ -220,7 +221,7 @@ error:
     return 0;
 }
 
-size_t DArray_capacity(DArray *array)
+uint32_t DArray_capacity(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
     return array->capacity;
@@ -229,7 +230,7 @@ error:
     return 0;
 }
 
-static int DArray_resize(DArray *array, size_t new_capacity)
+static int DArray_resize(DArray *array, uint32_t new_capacity)
 {
 	check(new_capacity > 0, "new_capacity should be greater than 0");
 
