@@ -73,7 +73,7 @@ bool Hashmap_set(Hashmap *map, void *key, void *data)
 	check_mem(node);
 
 	DArray_push(bucket, node);
-	
+
 	return true;
 
 error:
@@ -89,11 +89,11 @@ void *Hashmap_get(Hashmap *map, void *key)
 
 	DArray *bucket = DArray_get(map->buckets, index);
 	check(bucket != NULL, "Didn't find bucket for key");
-	
+
 	for (uint32_t i = 0; i < DArray_count(bucket); ++i)
 	{
 		HashmapNode *node = DArray_get(bucket, i);
-		if (node->key == key) 
+		if (node->key == key)
 		{
 			return node->data;
 		}
@@ -123,18 +123,18 @@ static int default_compare(void *a, void *b)
 /**
  * Simple Bob Jenkins's hash algorithm taken from wikipedia
  */
-static uint32_t default_hash(void* key) 
+static uint32_t default_hash(void* key)
 {
 	uint32_t length = blength((bstring)key);
 	bstring str = (bstring)key;
 
 	uint32_t i = 0;
 	uint32_t hash = 0;
-	
+
 	while (i != length) {
 		hash += bchar(str, i);
 		i++;
-		
+
 		hash += hash << 10;
 		hash ^= hash >> 6;
 	}
@@ -142,7 +142,7 @@ static uint32_t default_hash(void* key)
 	hash += hash << 3;
 	hash ^= hash >> 11;
 	hash += hash << 15;
-	
+
 	return hash;
 }
 
