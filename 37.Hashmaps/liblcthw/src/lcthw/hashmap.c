@@ -58,12 +58,12 @@ void Hashmap_destroy(Hashmap *map)
 
 	if (map->buckets)
 	{
-		for (int i = 0; i < DArray_count(map->buckets); ++i)
+		for (uint32_t i = 0; i < DArray_count(map->buckets); ++i)
 		{
 			DArray *bucket = DArray_get(map->buckets, i);
 			if (!bucket) continue;
 
-			for (int j = 0; j < DArray_count(bucket); ++i)
+			for (uint32_t j = 0; j < DArray_count(bucket); ++i)
 			{
 				DArray_destroy(DArray_get(bucket, j));
 			}
