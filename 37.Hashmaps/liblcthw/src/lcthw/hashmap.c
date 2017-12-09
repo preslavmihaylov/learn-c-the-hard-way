@@ -1,35 +1,12 @@
 #include <lcthw/hashmap.h>
 #include <lcthw/bstrlib.h>
+#include <assert.h>
 
-static int default_compare(void *a, void *b)
-{
-	return bstrcmp((bstring)a, (bstring)b);
-}
+static int default_compare(void *a, void *b);
+static uint32_t default_hash(void* key);
+static inline int Hashmap_findBucketIndex(Hashmap *map, void *key);
+static inline HashmapNode *HashmapNode_create(void *key, void *value);
 
-/**
- * Simple Bob Jenkins's hash algorithm taken from wikipedia
- */
-static uint32_t default_hash(void* key) {
-	uint32_t length = blength((bstring)key);
-	bstring str = (bstring)key;
-
-	uint32_t i = 0;
-	uint32_t hash = 0;
-	
-	while (i != length) {
-		hash += bchar(str, i);
-		i++;
-		
-		hash += hash << 10;
-		hash ^= hash >> 6;
-	}
-
-	hash += hash << 3;
-	hash ^= hash >> 11;
-	hash += hash << 15;
-	
-	return hash;
-}
 
 Hashmap *Hashmap_create(Hashmap_compare compare, Hashmap_hash hash)
 {
@@ -77,26 +54,123 @@ void Hashmap_destroy(Hashmap *map)
 	free(map);
 }
 
-int Hashmap_set(Hashmap *map, void *key, void *data)
+bool Hashmap_set(Hashmap *map, void *key, void *data)
 {
-	// TODO:
-	return 0;
+	check(map != NULL, "Map cannot be NULL");
+	check(map->buckets != NULL, "Map buckets cannot be NULL");
+
+	int index = Hashmap_findBucketIndex(map, key);
+	check(index >= 0, "Invalid index received from Hashmap_findBucketIndex");
+
+	DArray *bucket = DArray_get(map->buckets, index);
+	if (!bucket)
+	{
+		bucket = DArray_create(sizeof(void*), 5);
+		DArray_set(map->buckets, index, bucket);
+	}
+
+	HashmapNode *node = HashmapNode_create(key, data);
+	check_mem(node);
+
+	DArray_push(bucket, node);
+	
+	return true;
+
+error:
+	return false;
 }
 
 void *Hashmap_get(Hashmap *map, void *key)
 {
-	// TODO:
+	check(map != NULL, "Map cannot be NULL");
+	check(map->buckets != NULL, "Map buckets cannot be NULL");
+
+	uint32_t index = Hashmap_findBucketIndex(map, key);
+
+	DArray *bucket = DArray_get(map->buckets, index);
+	check(bucket != NULL, "Didn't find bucket for key");
+	
+	for (uint32_t i = 0; i < DArray_count(bucket); ++i)
+	{
+		HashmapNode *node = DArray_get(bucket, i);
+		if (node->key == key) 
+		{
+			return node->data;
+		}
+	}
+
+error: // fallthrough
 	return NULL;
 }
 
-int Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb)
+bool Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb)
 {
 	// TODO:
-	return 0;
+	return false;
 }
 
 void *Hashmap_delete(Hashmap *map, void *key)
 {
 	// TODO:
+	return NULL;
+}
+
+static int default_compare(void *a, void *b)
+{
+	return bstrcmp((bstring)a, (bstring)b);
+}
+
+/**
+ * Simple Bob Jenkins's hash algorithm taken from wikipedia
+ */
+static uint32_t default_hash(void* key) 
+{
+	uint32_t length = blength((bstring)key);
+	bstring str = (bstring)key;
+
+	uint32_t i = 0;
+	uint32_t hash = 0;
+	
+	while (i != length) {
+		hash += bchar(str, i);
+		i++;
+		
+		hash += hash << 10;
+		hash ^= hash >> 6;
+	}
+
+	hash += hash << 3;
+	hash ^= hash >> 11;
+	hash += hash << 15;
+	
+	return hash;
+}
+
+static inline int Hashmap_findBucketIndex(Hashmap *map, void *key)
+{
+	check(map != NULL, "Hashmap cannot be NULL at this point");
+	check(map->hash != NULL, "Hashmap hash function cannot be NULL at this point");
+	check(map->buckets != NULL, "Hashmap bucekts cannot be NULL at this point");
+
+	uint32_t hash = map->hash(key);
+	uint32_t index = hash % DArray_count(map->buckets);
+
+	return index;
+error:
+	assert(false); // this is an error in the library logic. Fail fast
+	return -1;
+}
+
+static inline HashmapNode *HashmapNode_create(void *key, void *value)
+{
+	HashmapNode *node = malloc(sizeof(HashmapNode));
+	check_mem(node);
+
+	node->key = key;
+	node->data = value;
+
+	return node;
+
+error:
 	return NULL;
 }
