@@ -1,8 +1,8 @@
 #include <lcthw/hashmap_algos.h>
 #include <lcthw/bstrlib.h>
 
-#define FNV_OFFSET_BASIS 2166136261
-#define FNV_PRIME 16777619
+const uint32_t FNV_OFFSET_BASIS = 2166136261U;
+const uint32_t FNV_PRIME = 16777619U;
 
 uint32_t Hashmap_fnv1a_hash(void *data)
 {
@@ -18,10 +18,22 @@ uint32_t Hashmap_fnv1a_hash(void *data)
 	return hash;
 }
 
+const uint32_t MOD_ADLER = 65521;
+
 uint32_t Hashmap_adler32_hash(void *data)
 {
-	// TODO:
-	return 0;
+	bstring str = (bstring)data;
+
+	uint32_t lo_byte = 1;
+	uint32_t hi_byte = 0;
+
+	for (int i = 0; i < blength(str); ++i)
+	{
+		lo_byte = (lo_byte + bchar(str, i)) % MOD_ADLER;
+		hi_byte = (hi_byte + lo_byte) % MOD_ADLER;
+	}
+
+	return ((hi_byte << 16) | lo_byte);
 }
 
 uint32_t Hashmap_djb_hash(void *data)
