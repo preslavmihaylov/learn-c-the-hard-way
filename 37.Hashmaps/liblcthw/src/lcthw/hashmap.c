@@ -40,7 +40,7 @@ void Hashmap_destroy(Hashmap *map)
 			DArray *bucket = DArray_get(map->buckets, i);
 			if (!bucket) continue;
 
-			for (uint32_t j = 0; j < DArray_count(bucket); ++i)
+			for (uint32_t j = 0; j < DArray_count(bucket); ++j)
 			{
 				DArray_destroy(DArray_get(bucket, j));
 			}
@@ -93,6 +93,8 @@ void *Hashmap_get(Hashmap *map, void *key)
 	for (uint32_t i = 0; i < DArray_count(bucket); ++i)
 	{
 		HashmapNode *node = DArray_get(bucket, i);
+		check(node != NULL, "DArray_get returned empty node");
+
 		if (node->key == key)
 		{
 			return node->data;
