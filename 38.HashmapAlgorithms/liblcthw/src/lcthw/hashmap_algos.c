@@ -38,6 +38,14 @@ uint32_t Hashmap_adler32_hash(void *data)
 
 uint32_t Hashmap_djb_hash(void *data)
 {
-	// TODO:
-	return 0;
+	bstring str = (bstring)data;
+	uint32_t hash = 5381;
+
+	for (int i = 0; i < blength(str); ++i)
+	{
+		/* hash * 33 + c */
+		hash = ((hash << 5) + hash) + bchar(str, i);
+	}
+
+	return hash;
 }
