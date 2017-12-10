@@ -107,13 +107,56 @@ error: // fallthrough
 
 bool Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb)
 {
-	// TODO:
+	check(map != NULL, "map cannot be NULL");
+	check(map->buckets != NULL, "map buckets cannot be NULL");
+
+	bool callbackResult = false;
+
+	for (uint32_t i = 0; i < DArray_count(map->buckets); ++i)
+	{
+		DArray *bucket = DArray_get(map->buckets, i);
+		if (bucket == NULL) continue;
+
+		for (uint32_t j = 0; j < DArray_count(bucket); ++j)
+		{
+			HashmapNode *node = DArray_get(bucket, j);
+
+			callbackResult = traverse_cb(node);
+			check(callbackResult == true,
+				  "Traverse callback returned false");
+		}
+	}
+
+	return true;
+
+error:
 	return false;
 }
 
 void *Hashmap_delete(Hashmap *map, void *key)
 {
-	// TODO:
+	check(map != NULL, "map cannot be NULL");
+	check(map->buckets != NULL, "map buckets cannot be NULL");
+
+	uint32_t index = Hashmap_findBucketIndex(map, key);
+
+	DArray *bucket = DArray_get(map->buckets, index);
+	check(bucket != NULL, "Didn't find bucket for key");
+
+	for (uint32_t i = 0; i < DArray_count(bucket); ++i)
+	{
+		HashmapNode *node = DArray_get(bucket, i);
+		check(node != NULL, "DArray_get returned empty node");
+
+		log_info("iteration %u", i);
+		if (node->key == key)
+		{
+			DArray_remove(bucket, i);
+			return node->data;
+		}
+	}
+
+error: // fallthrough
 	return NULL;
 }
 
