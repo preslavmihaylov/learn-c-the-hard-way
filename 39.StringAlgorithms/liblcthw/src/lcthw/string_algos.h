@@ -3,6 +3,7 @@
 
 #include <lcthw/bstrlib.h>
 #include <lcthw/darray.h>
+#include <unistd.h>
 
 typedef struct StringScanner {
 	bstring in;
