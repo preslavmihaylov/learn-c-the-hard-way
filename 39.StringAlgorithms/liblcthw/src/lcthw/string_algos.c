@@ -1,18 +1,41 @@
 #include <lcthw/string_algos.h>
 
 static inline void String_setup_skip_chars(
-	size_t *skip_chars, const unsigned char *searchedTerm, ssize_t length)
+	size_t *skipChars, const unsigned char *term, ssize_t length)
 {
 	int i;
 
 	for (i = 0; i < UCHAR_MAX + 1; i++)
 	{
-		skip_chars[i] = length;
+		skipChars[i] = length;
 	}
 
 	for (i = 0; i < length; i++)
 	{
-		skip_chars[searchedTerm[i]] = length - i - 1;
+		skipChars[term[i]] = length - i - 1;
+	}
+}
+
+static inline void String_base_search(
+	const unsigned char *text, ssize_t textLength,
+	const unsigned char *term, ssize_t termLength,
+	size_t *skipChars)
+{
+	int termIndex = 0;
+	while (textLength >= termLength)
+	{
+		termIndex = termLength - 1;
+
+		while (termIndex >= 0)
+		{
+			if (term[termIndex] != text[termIndex]) break;
+			--termIndex;
+		}
+
+		if (termIndex < 0) return;
+
+		text += skipChars[termIndex];
+		textLength -= skipChars[termIndex];
 	}
 }
 
