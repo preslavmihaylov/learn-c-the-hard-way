@@ -10,13 +10,13 @@ static inline void String_setup_skip_chars(
 		skipChars[i] = length;
 	}
 
-	for (i = 0; i < length; i++)
+	for (i = 0; i < length - 1; i++)
 	{
 		skipChars[term[i]] = length - i - 1;
 	}
 }
 
-static inline void String_base_search(
+static inline const unsigned char *String_base_search(
 	const unsigned char *text, ssize_t textLength,
 	const unsigned char *term, ssize_t termLength,
 	size_t *skipChars)
@@ -24,6 +24,8 @@ static inline void String_base_search(
 	int termIndex = 0;
 	while (textLength >= termLength)
 	{
+		//log_info("TEXT: %s, TERM: %s", text, term);
+		//log_info("TEXT_LENGTH: %ld, TERM_LENGTH: %ld", textLength, termLength);
 		termIndex = termLength - 1;
 
 		while (termIndex >= 0)
@@ -32,11 +34,23 @@ static inline void String_base_search(
 			--termIndex;
 		}
 
-		if (termIndex < 0) return;
+		/*
+		log_info("TERM INDEX: %d", termIndex);
+		log_info("SKIP_CHARS: [%lu, %lu, %lu, %lu, %lu]",
+			skipChars[term[0]],
+			skipChars[term[1]],
+			skipChars[term[2]],
+			skipChars[term[3]],
+			skipChars[term[4]]);
+		*/
 
-		text += skipChars[termIndex];
-		textLength -= skipChars[termIndex];
+		if (termIndex < 0) return text;
+
+		text += skipChars[text[termLength - 1]];
+		textLength -= skipChars[text[termLength - 1]];
 	}
+
+	return NULL;
 }
 
 StringScanner *StringScanner_create(bstring in)
@@ -47,8 +61,23 @@ StringScanner *StringScanner_create(bstring in)
 
 int String_find(bstring in, bstring what)
 {
-	// TODO:
-	return 0;
+	const unsigned char *text = (const unsigned char *)bdata(in);
+	ssize_t textLength = blength(in);
+
+	const unsigned char *term = (const unsigned char *)bdata(what);
+	ssize_t termLength = blength(what);
+
+	size_t skipChars[UCHAR_MAX + 1];
+
+	log_info("SETUP CHARS ENTER");
+	String_setup_skip_chars(skipChars, term, termLength);
+	log_info("SETUP CHARS EXIT");
+	log_info("BASE SEARCH ENTER");
+	const unsigned char *found =
+		String_base_search(text, textLength, term, termLength, skipChars);
+	log_info("BASE SEARCH EXIT");
+
+	return found != NULL ? found - text : -1;
 }
 
 int StringScanner_scan(StringScanner *scan, bstring toFind)

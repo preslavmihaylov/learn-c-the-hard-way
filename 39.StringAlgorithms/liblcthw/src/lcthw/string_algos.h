@@ -4,6 +4,7 @@
 #include <lcthw/bstrlib.h>
 #include <lcthw/darray.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 typedef struct StringScanner {
 	bstring in;
