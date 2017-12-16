@@ -24,8 +24,6 @@ static inline const unsigned char *String_base_search(
 	int termIndex = 0;
 	while (textLength >= termLength)
 	{
-		//log_info("TEXT: %s, TERM: %s", text, term);
-		//log_info("TEXT_LENGTH: %ld, TERM_LENGTH: %ld", textLength, termLength);
 		termIndex = termLength - 1;
 
 		while (termIndex >= 0)
@@ -33,16 +31,6 @@ static inline const unsigned char *String_base_search(
 			if (term[termIndex] != text[termIndex]) break;
 			--termIndex;
 		}
-
-		/*
-		log_info("TERM INDEX: %d", termIndex);
-		log_info("SKIP_CHARS: [%lu, %lu, %lu, %lu, %lu]",
-			skipChars[term[0]],
-			skipChars[term[1]],
-			skipChars[term[2]],
-			skipChars[term[3]],
-			skipChars[term[4]]);
-		*/
 
 		if (termIndex < 0) return text;
 
