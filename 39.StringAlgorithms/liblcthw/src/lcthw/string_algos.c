@@ -34,8 +34,9 @@ static inline const unsigned char *String_base_search(
 
 		if (termIndex < 0) return text;
 
-		text += skipChars[text[termLength - 1]];
-		textLength -= skipChars[text[termLength - 1]];
+		int indicesToSkip = skipChars[text[termLength - 1]];
+		text += indicesToSkip;
+		textLength -= indicesToSkip;
 	}
 
 	return NULL;
