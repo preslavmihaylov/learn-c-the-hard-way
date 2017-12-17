@@ -58,13 +58,9 @@ int String_find(bstring in, bstring what)
 
 	size_t skipChars[UCHAR_MAX + 1];
 
-	log_info("SETUP CHARS ENTER");
 	String_setup_skip_chars(skipChars, term, termLength);
-	log_info("SETUP CHARS EXIT");
-	log_info("BASE SEARCH ENTER");
 	const unsigned char *found =
 		String_base_search(text, textLength, term, termLength, skipChars);
-	log_info("BASE SEARCH EXIT");
 
 	return found != NULL ? found - text : -1;
 }
