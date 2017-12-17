@@ -10,6 +10,7 @@ static inline const unsigned char *String_base_search(
 
 int String_find(bstring in, bstring what)
 {
+	// TODO: Add safety checks
 	const unsigned char *text = (const unsigned char *)bdata(in);
 	ssize_t textLength = blength(in);
 
