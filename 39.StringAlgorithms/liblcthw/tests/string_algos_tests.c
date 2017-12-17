@@ -3,8 +3,17 @@
 #include <lcthw/bstrlib.h>
 #include <time.h>
 
-struct tagbstring IN_STR = bsStatic(
+struct tagbstring IN_STR1 = bsStatic(
 		"I have ALPHA beta ALPHA and oranges ALPHA");
+struct tagbstring IN_STR2 = bsStatic(
+		"ALPHA beta ALPHA and oranges ALPHA");
+struct tagbstring IN_STR3 = bsStatic(
+		"beta");
+struct tagbstring IN_STR4 = bsStatic(
+		"gamma beta ALPHA");
+struct tagbstring IN_STR5 = bsStatic(
+		"bALPHA");
+
 struct tagbstring ALPHA = bsStatic("ALPHA");
 const int TEST_TIME = 1;
 
@@ -13,8 +22,16 @@ char *test_find_and_scan()
 	//StringScanner *scan = StringScanner_create(&IN_STR);
 	//mu_assert(scan != NULL, "Failed to make the scanner");
 
-	int find_i = String_find(&IN_STR, &ALPHA);
-	mu_assert(find_i > 0, "Failed to find 'ALPHA' in test string");
+	mu_assert(String_find(&IN_STR1, &ALPHA) == binstr(&IN_STR1, 0, &ALPHA), 
+			  "String_find returned wrong index for IN_STR1");
+	mu_assert(String_find(&IN_STR2, &ALPHA) == binstr(&IN_STR2, 0, &ALPHA), 
+			  "String_find returned wrong index for IN_STR2");
+	mu_assert(String_find(&IN_STR3, &ALPHA) == binstr(&IN_STR3, 0, &ALPHA), 
+			  "String_find returned wrong index for IN_STR3");
+	mu_assert(String_find(&IN_STR4, &ALPHA) == binstr(&IN_STR4, 0, &ALPHA), 
+			  "String_find returned wrong index for IN_STR4");
+	mu_assert(String_find(&IN_STR5, &ALPHA) == binstr(&IN_STR5, 0, &ALPHA), 
+			  "String_find returned wrong index for IN_STR5");
 
 	//int scan_i = StringScanner_scan(scan, &ALPHA);
 	//mu_assert(scan_i > 0, "Failed to find 'ALPHA' with scan");
@@ -44,7 +61,7 @@ char *test_binstr_performance()
 	do {
 		for (i = 0; i < 1000; i++)
 		{
-			found_at = binstr(&IN_STR, 0, &ALPHA);
+			found_at = binstr(&IN_STR1, 0, &ALPHA);
 			mu_assert(found_at != BSTR_ERR, "Failed to find!");
 			find_count++;
 		}
@@ -68,7 +85,7 @@ char *test_find_performance()
 	do {
 		for (i = 0; i < 1000; ++i)
 		{
-			String_find(&IN_STR, &ALPHA);
+			String_find(&IN_STR1, &ALPHA);
 			find_count++;
 		}
 
@@ -87,7 +104,7 @@ char *test_scan_performance()
 	int found_at = 0;
 	unsigned long find_count = 0;
 	time_t elapsed = 0;
-	StringScanner *scan = StringScanner_create(&IN_STR);
+	StringScanner *scan = StringScanner_create(&IN_STR1);
 
 	time_t start = time(NULL);
 
