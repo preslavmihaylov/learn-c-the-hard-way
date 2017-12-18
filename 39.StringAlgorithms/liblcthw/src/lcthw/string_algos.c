@@ -1,5 +1,6 @@
 #include <lcthw/string_algos.h>
 
+static void StringScanner_reset(StringScanner *scanner);
 static inline void String_setup_skip_chars(
 	size_t *skipChars, const unsigned char *term, ssize_t length);
 
@@ -13,7 +14,6 @@ int String_find(bstring in, bstring what)
 	check(in != NULL, "input text cannot be NULL");
 	check(what != NULL, "input search term cannot be NULL");
 
-	// TODO: Add safety checks
 	const unsigned char *text = (const unsigned char *)bdata(in);
 	ssize_t textLength = blength(in);
 
@@ -34,7 +34,18 @@ error:
 
 StringScanner *StringScanner_create(bstring in)
 {
-	// TODO:
+	check(in != NULL, "Input string cannot be NULL");
+
+	StringScanner *scanner = malloc(sizeof(StringScanner));
+	scanner->input = in;
+	scanner->term = NULL;
+	scanner->termLength = 0;
+
+	StringScanner_reset(scanner);
+
+	return scanner;
+
+error:
 	return NULL;
 }
 
@@ -48,6 +59,18 @@ int StringScanner_scan(StringScanner *scan, bstring toFind)
 void StringScanner_destroy(StringScanner *scan)
 {
 	// TODO:
+}
+
+static void StringScanner_reset(StringScanner *scanner)
+{
+	check(scanner != NULL, "Scanner cannot be NULL");
+	check(scanner->input != NULL, "Scanner text cannot be NULL");
+
+	scanner->text = (const unsigned char *)bdata(scanner->input);
+	scanner->textLength = blength(scanner->input);
+
+error: // fallthrough
+	return;
 }
 
 static inline void String_setup_skip_chars(

@@ -19,19 +19,23 @@ const int TEST_TIME = 1;
 
 char *test_find_and_scan()
 {
-	//StringScanner *scan = StringScanner_create(&IN_STR);
-	//mu_assert(scan != NULL, "Failed to make the scanner");
-
-	mu_assert(String_find(&IN_STR1, &ALPHA) == binstr(&IN_STR1, 0, &ALPHA), 
+	mu_assert(String_find(&IN_STR1, &ALPHA) == binstr(&IN_STR1, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR1");
-	mu_assert(String_find(&IN_STR2, &ALPHA) == binstr(&IN_STR2, 0, &ALPHA), 
+	mu_assert(String_find(&IN_STR2, &ALPHA) == binstr(&IN_STR2, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR2");
-	mu_assert(String_find(&IN_STR3, &ALPHA) == binstr(&IN_STR3, 0, &ALPHA), 
+	mu_assert(String_find(&IN_STR3, &ALPHA) == binstr(&IN_STR3, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR3");
-	mu_assert(String_find(&IN_STR4, &ALPHA) == binstr(&IN_STR4, 0, &ALPHA), 
+	mu_assert(String_find(&IN_STR4, &ALPHA) == binstr(&IN_STR4, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR4");
-	mu_assert(String_find(&IN_STR5, &ALPHA) == binstr(&IN_STR5, 0, &ALPHA), 
+	mu_assert(String_find(&IN_STR5, &ALPHA) == binstr(&IN_STR5, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR5");
+
+	StringScanner *scan = StringScanner_create(&IN_STR1);
+	mu_assert(scan != NULL, "Failed to make the scanner");
+	mu_assert(strcmp((char *)scan->text, (char *)bdata(&IN_STR1)) == 0,
+			  "Input text was not corrent upon scanner creation");
+	mu_assert(scan->textLength == blength(&IN_STR1),
+			  "Scanner length was invalid after creation");
 
 	//int scan_i = StringScanner_scan(scan, &ALPHA);
 	//mu_assert(scan_i > 0, "Failed to find 'ALPHA' with scan");

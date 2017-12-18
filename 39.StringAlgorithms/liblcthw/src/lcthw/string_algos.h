@@ -12,7 +12,7 @@ typedef struct StringScanner {
 	ssize_t textLength;
 	const unsigned char *term;
 	ssize_t termLength;
-	size_t skip_chars[UCHAR_MAX + 1];
+	size_t skipChars[UCHAR_MAX + 1];
 } StringScanner;
 
 int String_find(bstring in, bstring what);
