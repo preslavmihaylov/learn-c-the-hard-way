@@ -2,11 +2,11 @@
 
 static inline void StringScanner_reset(StringScanner *scanner);
 static inline void String_setup_skip_chars(
-	size_t *skipChars, const unsigned char *term, ssize_t length);
+	size_t *skipChars, const uint8_t *term, ssize_t length);
 
-static inline const unsigned char *String_base_search(
-	const unsigned char *text, ssize_t textLength,
-	const unsigned char *term, ssize_t termLength,
+static inline const uint8_t *String_base_search(
+	const uint8_t *text, ssize_t textLength,
+	const uint8_t *term, ssize_t termLength,
 	size_t *skipChars);
 
 int String_find(bstring inputText, bstring inputTerm)
@@ -14,16 +14,16 @@ int String_find(bstring inputText, bstring inputTerm)
 	check(inputText != NULL, "input text cannot be NULL");
 	check(inputTerm != NULL, "input search term cannot be NULL");
 
-	const unsigned char *text = (const unsigned char *)bdata(inputText);
+	const uint8_t *text = (const uint8_t *)bdata(inputText);
 	ssize_t textLength = blength(inputText);
 
-	const unsigned char *term = (const unsigned char *)bdata(inputTerm);
+	const uint8_t *term = (const uint8_t *)bdata(inputTerm);
 	ssize_t termLength = blength(inputTerm);
 
 	size_t skipChars[UCHAR_MAX + 1];
 
 	String_setup_skip_chars(skipChars, term, termLength);
-	const unsigned char *found =
+	const uint8_t *found =
 		String_base_search(text, textLength, term, termLength, skipChars);
 
 	return found != NULL ? found - text : -1;
@@ -75,7 +75,7 @@ static inline void StringScanner_reset(StringScanner *scanner)
 	check(scanner != NULL, "Scanner cannot be NULL");
 	check(scanner->inputText != NULL, "Scanner text cannot be NULL");
 
-	scanner->text = (const unsigned char *)bdata(scanner->inputText);
+	scanner->text = (const uint8_t *)bdata(scanner->inputText);
 	scanner->textLength = blength(scanner->inputText);
 
 error: // fallthrough
@@ -83,7 +83,7 @@ error: // fallthrough
 }
 
 static inline void String_setup_skip_chars(
-	size_t *skipChars, const unsigned char *term, ssize_t length)
+	size_t *skipChars, const uint8_t *term, ssize_t length)
 {
 	int i;
 
@@ -98,9 +98,9 @@ static inline void String_setup_skip_chars(
 	}
 }
 
-static inline const unsigned char *String_base_search(
-	const unsigned char *text, ssize_t textLength,
-	const unsigned char *term, ssize_t termLength,
+static inline const uint8_t *String_base_search(
+	const uint8_t *text, ssize_t textLength,
+	const uint8_t *term, ssize_t termLength,
 	size_t *skipChars)
 {
 	int termIndex = 0;

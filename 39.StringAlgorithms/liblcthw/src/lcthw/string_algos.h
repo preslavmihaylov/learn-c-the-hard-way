@@ -8,10 +8,10 @@
 
 typedef struct StringScanner {
 	bstring inputText;
-	const unsigned char *text;
+	const uint8_t *text;
 	ssize_t textLength;
 	bstring inputTerm;
-	const unsigned char *term;
+	const uint8_t *term;
 	ssize_t termLength;
 	size_t skipChars[UCHAR_MAX + 1];
 } StringScanner;
