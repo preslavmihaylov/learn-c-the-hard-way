@@ -10,6 +10,9 @@ static inline const unsigned char *String_base_search(
 
 int String_find(bstring in, bstring what)
 {
+	check(in != NULL, "input text cannot be NULL");
+	check(what != NULL, "input search term cannot be NULL");
+
 	// TODO: Add safety checks
 	const unsigned char *text = (const unsigned char *)bdata(in);
 	ssize_t textLength = blength(in);
@@ -24,6 +27,9 @@ int String_find(bstring in, bstring what)
 		String_base_search(text, textLength, term, termLength, skipChars);
 
 	return found != NULL ? found - text : -1;
+
+error:
+	return -1;
 }
 
 StringScanner *StringScanner_create(bstring in)
