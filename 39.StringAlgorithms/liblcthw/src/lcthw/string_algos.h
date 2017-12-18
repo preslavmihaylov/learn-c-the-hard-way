@@ -7,17 +7,18 @@
 #include <stdbool.h>
 
 typedef struct StringScanner {
-	bstring input;
+	bstring inputText;
 	const unsigned char *text;
 	ssize_t textLength;
+	bstring inputTerm;
 	const unsigned char *term;
 	ssize_t termLength;
 	size_t skipChars[UCHAR_MAX + 1];
 } StringScanner;
 
-int String_find(bstring in, bstring what);
-StringScanner *StringScanner_create(bstring in);
-int StringScanner_scan(StringScanner *scan, bstring toFind);
-void StringScanner_destroy(StringScanner *scan);
+int String_find(bstring inputText, bstring inputTerm);
+StringScanner *StringScanner_create(bstring inputText);
+int StringScanner_scan(StringScanner *scanner, bstring toFind);
+void StringScanner_destroy(StringScanner *scanner);
 
 #endif // LCTHW
