@@ -13,11 +13,11 @@ struct tagbstring IN_STR4 = bsStatic(
 		"gamma beta ALPHA");
 struct tagbstring IN_STR5 = bsStatic(
 		"bALPHA");
-
 struct tagbstring ALPHA = bsStatic("ALPHA");
+
 const int TEST_TIME = 1;
 
-char *test_find_and_scan()
+char *test_find()
 {
 	mu_assert(String_find(&IN_STR1, &ALPHA) == binstr(&IN_STR1, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR1");
@@ -30,6 +30,11 @@ char *test_find_and_scan()
 	mu_assert(String_find(&IN_STR5, &ALPHA) == binstr(&IN_STR5, 0, &ALPHA),
 			  "String_find returned wrong index for IN_STR5");
 
+	return NULL;
+}
+
+char *test_scan()
+{
 	StringScanner *scan = StringScanner_create(&IN_STR1);
 	mu_assert(scan != NULL, "Failed to make the scanner");
 	mu_assert(strcmp((char *)scan->text, (char *)bdata(&IN_STR1)) == 0,
@@ -37,19 +42,19 @@ char *test_find_and_scan()
 	mu_assert(scan->textLength == blength(&IN_STR1),
 			  "Scanner length was invalid after creation");
 
-	//int scan_i = StringScanner_scan(scan, &ALPHA);
-	//mu_assert(scan_i > 0, "Failed to find 'ALPHA' with scan");
-	//mu_assert(scan_i == find_i, "Find and scan don't match");
+	int scan_i = StringScanner_scan(scan, &ALPHA);
+	mu_assert(scan_i == 7, "Failed to find 'ALPHA' with scan first time");
 
-	//scan_i = StringScanner_scan(scan, &ALPHA);
-	//mu_assert(scan_i > find_i, "should find another ALPHA after the first");
+	scan_i = StringScanner_scan(scan, &ALPHA);
+	mu_assert(scan_i == 18, "should find another ALPHA after the first");
 
-	//scan_i = StringScanner_scan(scan, &ALPHA);
-	//mu_assert(scan_i > find_i, "should find another ALPHA after the first");
+	scan_i = StringScanner_scan(scan, &ALPHA);
+	mu_assert(scan_i == 36, "should find another ALPHA after the second");
 
-	//mu_assert(StringScanner_scan(scan, &ALPHA) == -1, "shouldn't find it");
+	mu_assert(StringScanner_scan(scan, &ALPHA) == -1,
+			  "shouldn't find text after scan is complete");
 
-	//StringScanner_destroy(scan);
+	StringScanner_destroy(scan);
 
 	return NULL;
 }
@@ -138,7 +143,8 @@ char *all_tests()
 {
 	mu_suite_start();
 
-	mu_run_test(test_find_and_scan);
+	mu_run_test(test_find);
+	mu_run_test(test_scan);
 
 #if 0
 	mu_run_test(test_scan_performance);

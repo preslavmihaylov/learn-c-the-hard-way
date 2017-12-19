@@ -60,7 +60,7 @@ int StringScanner_scan(StringScanner *scanner, bstring inputTerm)
 	check(inputTerm != NULL, "input search term cannot be NULL");
 	check(scanner->inputText != NULL, "scanner input cannot be NULL");
 	check(scanner->text != NULL, "scanner text cannot be NULL");
-	check(scanner->textLength > 0, "scanner text length cannot be 0");
+	check(scanner->textLength >= 0, "scanner text length cannot be negative");
 
 	int foundIndex = 0;
 
@@ -81,7 +81,8 @@ int StringScanner_scan(StringScanner *scanner, bstring inputTerm)
 	{
 		foundIndex = found - (const uint8_t *)bdata(scanner->inputText);
 		scanner->text = found + scanner->termLength;
-		scanner->textLength -= foundIndex - scanner->termLength;
+		scanner->textLength =
+			blength(scanner->inputText) - (foundIndex + scanner->termLength);
 	}
 	else
 	{
