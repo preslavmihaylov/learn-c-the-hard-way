@@ -18,7 +18,7 @@ typedef struct StringScanner {
 
 int String_find(bstring inputText, bstring inputTerm);
 StringScanner *StringScanner_create(bstring inputText);
-int StringScanner_scan(StringScanner *scanner, bstring toFind);
+int StringScanner_scan(StringScanner *scanner, bstring inputTerm);
 void StringScanner_destroy(StringScanner *scanner);
 
 #endif // LCTHW

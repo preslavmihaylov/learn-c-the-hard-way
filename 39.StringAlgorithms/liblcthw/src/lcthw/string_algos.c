@@ -1,6 +1,7 @@
 #include <lcthw/string_algos.h>
 
 static inline void StringScanner_reset(StringScanner *scanner);
+static inline void StringScanner_resetTerm(StringScanner *scanner, bstring inputTerm);
 static inline void String_setup_skip_chars(
 	size_t *skipChars, const uint8_t *term, ssize_t length);
 
@@ -53,10 +54,45 @@ error:
 }
 
 
-int StringScanner_scan(StringScanner *scanner, bstring toFind)
+int StringScanner_scan(StringScanner *scanner, bstring inputTerm)
 {
-	// TODO:
-	return 0;
+	check(scanner != NULL, "scanner cannot be NULL");
+	check(inputTerm != NULL, "input search term cannot be NULL");
+	check(scanner->inputText != NULL, "scanner input cannot be NULL");
+	check(scanner->text != NULL, "scanner text cannot be NULL");
+	check(scanner->textLength > 0, "scanner text length cannot be 0");
+
+	int foundIndex = 0;
+
+	if (bstrcmp(inputTerm, scanner->inputTerm) != 0)
+	{
+		StringScanner_resetTerm(scanner, inputTerm);
+		String_setup_skip_chars(scanner->skipChars, scanner->term, scanner->termLength);
+	}
+
+	const uint8_t *found =
+		String_base_search(scanner->text,
+						   scanner->textLength,
+						   scanner->term,
+						   scanner->termLength,
+						   scanner->skipChars);
+
+	if (found)
+	{
+		foundIndex = found - (const uint8_t *)bdata(scanner->inputText);
+		scanner->text = found + scanner->termLength;
+		scanner->textLength -= foundIndex - scanner->termLength;
+	}
+	else
+	{
+		StringScanner_reset(scanner);
+		foundIndex = -1;
+	}
+
+	return foundIndex;
+
+error:
+	return -1;
 }
 
 void StringScanner_destroy(StringScanner *scanner)
@@ -77,6 +113,18 @@ static inline void StringScanner_reset(StringScanner *scanner)
 
 	scanner->text = (const uint8_t *)bdata(scanner->inputText);
 	scanner->textLength = blength(scanner->inputText);
+
+error: // fallthrough
+	return;
+}
+
+static inline void StringScanner_resetTerm(StringScanner *scanner, bstring inputTerm)
+{
+	check(scanner != NULL, "Scanner cannot be NULL");
+
+	scanner->inputTerm = bstrcpy(inputTerm);
+	scanner->term = (const uint8_t *)bdata(inputTerm);
+	scanner->termLength = blength(inputTerm);
 
 error: // fallthrough
 	return;
