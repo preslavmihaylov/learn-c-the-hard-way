@@ -1,6 +1,8 @@
 #ifndef LCTHW_BSTREE_H
 #define LCTHW_BSTREE_H
 
+#include <stdlib.h>
+
 typedef int (*BSTree_compare) (void *a, void *b);
 
 typedef struct BSTreeNode
@@ -18,7 +20,7 @@ typedef struct BSTree
 	int count;
 	BSTree_compare compare_cb;
 	BSTreeNode *root;
-}
+} BSTree;
 
 typedef int (*BSTree_traverse_cb) (BSTreeNode *node);
 
