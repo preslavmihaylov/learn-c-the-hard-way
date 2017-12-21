@@ -1,8 +1,22 @@
 #include <lcthw/bstree.h>
+#include <lcthw/dbg.h>
+#include <lcthw/bstrlib.h>
+
+static int BSTree_default_compare(void *a, void *b);
 
 BSTree *BSTree_create(BSTree_compare compare_cb)
 {
-	// TODO:
+	BSTree *tree = malloc(sizeof(BSTree));
+	check_mem(tree);
+
+	tree->count = 0;
+	tree->root = NULL;
+	tree->compare_cb =
+		compare_cb != NULL ? compare_cb : BSTree_default_compare;
+
+	return tree;
+
+error:
 	return NULL;
 }
 
@@ -33,4 +47,9 @@ void *BSTree_delete(BSTree *map, void *key)
 {
 	// TODO:
 	return NULL;
+}
+
+static int BSTree_default_compare(void *a, void *b)
+{
+	return bstrcmp((bstring)a, (bstring)b);
 }
