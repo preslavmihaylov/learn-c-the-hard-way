@@ -56,20 +56,31 @@ char *test_get_set()
 	int rc;
 	bstring result;
 
+
 	rc = BSTree_set(map, &test1, &expect1);
 	mu_assert(rc == 0, "Failed to set &test1");
 	result = BSTree_get(map, &test1);
 	mu_assert(result == &expect1, "Wrong value for test 1");
+
+	struct tagbstring indent = bsStatic("");
+	log_info("After setting test 1");
+	BSTreeNode_print(&indent, map->root);
 
 	rc = BSTree_set(map, &test2, &expect2);
 	mu_assert(rc == 0, "Failed to set &test2");
 	result = BSTree_get(map, &test2);
 	mu_assert(result == &expect2, "Wrong value for test 2");
 
+	log_info("After setting test 1");
+	BSTreeNode_print(&indent, map->root);
+
 	rc = BSTree_set(map, &test3, &expect3);
 	mu_assert(rc == 0, "Failed to set &test3");
 	result = BSTree_get(map, &test3);
 	mu_assert(result == &expect3, "Wrong value for test 3");
+
+	log_info("After setting test 1");
+	BSTreeNode_print(&indent, map->root);
 
 	return NULL;
 }
