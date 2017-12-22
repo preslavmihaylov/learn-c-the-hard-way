@@ -1,12 +1,23 @@
 #include <lcthw/bstree.h>
 #include <lcthw/dbg.h>
 #include <lcthw/bstrlib.h>
+#include <assert.h>
+
+typedef enum
+{
+	BSTNodeChild_LEFT,
+	BSTNodeChild_RIGHT
+} BSTNodeChild;
 
 static int BSTree_default_compare(void *a, void *b);
 static int BSTreeNode_traverse(BSTreeNode *node, BSTree_traverse_cb traverse_cb);
 static int BSTreeNode_set(BSTreeNode *node, void *key, void *value, BSTree_compare compare_cb);
 static BSTreeNode *BSTreeNode_create(void *key, void *value, BSTreeNode *parent);
 static BSTreeNode *BSTreeNode_getNode(BSTreeNode *node, void *key, BSTree_compare compare_cb);
+static void *BSTreeNode_delete(BSTree *map, BSTreeNode *node);
+static BSTreeNode *BSTreeNode_findRightmost(BSTreeNode *node);
+static void BSTreeNode_assignChild(BSTreeNode *parent, BSTreeNode *child, BSTNodeChild childType);
+static void BSTreeNode_setParent(BSTree *map, BSTreeNode *childNode, BSTreeNode *newChildNode);
 
 BSTree *BSTree_create(BSTree_compare compare_cb)
 {
@@ -82,7 +93,10 @@ void *BSTree_delete(BSTree *map, void *key)
 {
 	if (map->root)
 	{
-		// TODO:
+		BSTreeNode *node = BSTreeNode_getNode(map->root, key, map->compare_cb);
+		if (!node) return NULL;
+
+		return BSTreeNode_delete(map, node);
 	}
 
 	return NULL;
@@ -201,22 +215,90 @@ error:
 	return NULL;
 }
 
-void BSTreeNode_print(bstring indent, BSTreeNode *node)
+static void *BSTreeNode_delete(BSTree *map, BSTreeNode *node)
 {
+	check(map != NULL, "Map cannot be NULL");
 	check(node != NULL, "Node cannot be NULL");
 
-	if (node->left)
+	void *value = node->value;
+	if (node->left && node->right)
 	{
-		bstring leftIndent = bformat("%s\t", bdata(indent));
-		BSTreeNode_print(leftIndent, node->left);
+		BSTreeNode *nodeToSwap = BSTreeNode_findRightmost(node->left);
+		assert(nodeToSwap->parent);
+
+		node->key = nodeToSwap->key;
+		node->value = nodeToSwap->value;
+
+		BSTreeNode_setParent(map, nodeToSwap, nodeToSwap->left);
+		free(nodeToSwap);
+	}
+	else if (node->left)
+	{
+		BSTreeNode_setParent(map, node, node->left);
+	}
+	else
+	{
+		BSTreeNode_setParent(map, node, node->right);
 	}
 
-	printf("%s%s\n", bdata(indent), bdata((bstring)node->key));
+	return value;
 
+error:
+	return NULL;
+}
+
+static BSTreeNode *BSTreeNode_findRightmost(BSTreeNode *node)
+{
 	if (node->right)
 	{
-		bstring rightIndent = bformat("%s\t", bdata(indent));
-		BSTreeNode_print(rightIndent, node->right);
+		return BSTreeNode_findRightmost(node->right);
+	}
+	else
+	{
+		return node;
+	}
+}
+
+static void BSTreeNode_assignChild(BSTreeNode *parent, BSTreeNode *child, BSTNodeChild childType)
+{
+	if (parent)
+	{
+		if (childType == BSTNodeChild_LEFT)
+		{
+			parent->left = child;
+		}
+		else
+		{
+			parent->right = child;
+		}
+	}
+
+	if (child)
+	{
+		child->parent = parent;
+	}
+}
+
+static void BSTreeNode_setParent(BSTree *map, BSTreeNode *childNode, BSTreeNode *newChildNode)
+{
+	check(map != NULL, "Map cannot be NULL");
+	check(childNode != NULL, "Child node cannot be NULL");
+
+	if (childNode->parent)
+	{
+		BSTNodeChild childType =
+			childNode->parent->left == childNode ? BSTNodeChild_LEFT : BSTNodeChild_RIGHT;
+
+		BSTreeNode_assignChild(childNode->parent, newChildNode, childType);
+	}
+	else
+	{
+		map->root = newChildNode;
+
+		if (newChildNode)
+		{
+			newChildNode->parent = NULL;
+		}
 	}
 
 error: // fallthrough
