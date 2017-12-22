@@ -14,14 +14,14 @@ struct tagbstring expect1 = bsStatic("THE VALUE 1");
 struct tagbstring expect2 = bsStatic("THE VALUE 2");
 struct tagbstring expect3 = bsStatic("THE VALUE 3");
 
-static int traverse_good_cb(BSTreeNode *node)
+static int traverse_good_cb(BSTNode *node)
 {
 	debug("KEY: %s", bdata((bstring)node->key));
 	traverse_called++;
 	return 0;
 }
 
-static int traverse_fail_cb(BSTreeNode *node)
+static int traverse_fail_cb(BSTNode *node)
 {
 	debug("KEY: %s", bdata((bstring)node->key));
 	traverse_called++;

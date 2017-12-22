@@ -6,24 +6,24 @@
 
 typedef int (*BSTree_compare) (void *a, void *b);
 
-typedef struct BSTreeNode
+typedef struct BSTNode
 {
 	void *key;
 	void *value;
 
-	struct BSTreeNode *left;
-	struct BSTreeNode *right;
-	struct BSTreeNode *parent;
-} BSTreeNode;
+	struct BSTNode *left;
+	struct BSTNode *right;
+	struct BSTNode *parent;
+} BSTNode;
 
 typedef struct BSTree
 {
 	int count;
 	BSTree_compare compare_cb;
-	BSTreeNode *root;
+	BSTNode *root;
 } BSTree;
 
-typedef int (*BSTree_traverse_cb) (BSTreeNode *node);
+typedef int (*BSTree_traverse_cb) (BSTNode *node);
 
 BSTree *BSTree_create(BSTree_compare compare_cb);
 void BSTree_destroy(BSTree *map);
