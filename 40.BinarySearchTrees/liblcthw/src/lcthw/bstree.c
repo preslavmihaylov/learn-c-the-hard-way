@@ -37,7 +37,10 @@ error:
 
 void BSTree_destroy(BSTree *map)
 {
-	// TODO:
+	if (map)
+	{
+		BSTree_traverse(map, BSTreeNode_delete);
+	}
 }
 
 int BSTree_set(BSTree *map, void *key, void *value)
@@ -91,14 +94,7 @@ error:
 
 void *BSTree_delete(BSTree *map, void *key)
 {
-	if (map->root)
-	{
-		BSTreeNode *node = BSTreeNode_getNode(map->root, key, map->compare_cb);
-		if (!node) return NULL;
-
-		return BSTreeNode_delete(map, node);
-	}
-
+	// TODO:
 	return NULL;
 }
 
@@ -235,10 +231,12 @@ static void *BSTreeNode_delete(BSTree *map, BSTreeNode *node)
 	else if (node->left)
 	{
 		BSTreeNode_setParent(map, node, node->left);
+		free(node);
 	}
 	else
 	{
 		BSTreeNode_setParent(map, node, node->right);
+		free(node);
 	}
 
 	return value;
