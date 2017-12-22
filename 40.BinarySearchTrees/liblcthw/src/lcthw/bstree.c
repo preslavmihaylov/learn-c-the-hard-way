@@ -10,6 +10,7 @@ typedef enum
 } BSTNodeChild;
 
 static int BSTree_default_compare(void *a, void *b);
+static int BSTree_destroy_cb(BSTreeNode *node);
 static int BSTreeNode_traverse(BSTreeNode *node, BSTree_traverse_cb traverse_cb);
 static int BSTreeNode_set(BSTreeNode *node, void *key, void *value, BSTree_compare compare_cb);
 static BSTreeNode *BSTreeNode_create(void *key, void *value, BSTreeNode *parent);
@@ -37,8 +38,11 @@ error:
 
 void BSTree_destroy(BSTree *map)
 {
-	// TODO:
-	return;
+	if (map)
+	{
+		BSTree_traverse(map, BSTree_destroy_cb);
+		free(map);
+	}
 }
 
 int BSTree_set(BSTree *map, void *key, void *value)
@@ -106,6 +110,12 @@ void *BSTree_delete(BSTree *map, void *key)
 static int BSTree_default_compare(void *a, void *b)
 {
 	return bstrcmp((bstring)a, (bstring)b);
+}
+
+static int BSTree_destroy_cb(BSTreeNode *node)
+{
+	free(node);
+	return 0;
 }
 
 static int BSTreeNode_traverse(BSTreeNode *node, BSTree_traverse_cb traverse_cb)
