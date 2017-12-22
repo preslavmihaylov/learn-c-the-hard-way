@@ -15,10 +15,10 @@ static int BSTNode_traverse(BSTNode *node, BSTree_traverse_cb traverse_cb);
 static int BSTNode_set(BSTNode *node, void *key, void *value, BSTree_compare compare_cb);
 static BSTNode *BSTNode_create(void *key, void *value, BSTNode *parent);
 static BSTNode *BSTNode_getNode(BSTNode *node, void *key, BSTree_compare compare_cb);
-static void *BSTNode_delete(BSTree *map, BSTNode *node);
+static void *BSTNode_delete(BSTree *tree, BSTNode *node);
 static BSTNode *BSTNode_findRightmostNode(BSTNode *node);
 static void BSTNode_assignChild(BSTNode *parent, BSTNode *child, BSTNodeChild childType);
-static void BSTNode_replaceParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode);
+static void BSTNode_replaceParent(BSTree *tree, BSTNode *childNode, BSTNode *newChildNode);
 
 BSTree *BSTree_create(BSTree_compare compare_cb)
 {
@@ -33,43 +33,44 @@ BSTree *BSTree_create(BSTree_compare compare_cb)
 	return tree;
 
 error:
+	BSTree_destroy(tree);
 	return NULL;
 }
 
-void BSTree_destroy(BSTree *map)
+void BSTree_destroy(BSTree *tree)
 {
-	if (map)
+	if (tree)
 	{
-		BSTree_traverse(map, BSTree_destroy_cb);
-		free(map);
+		BSTree_traverse(tree, BSTree_destroy_cb);
+		free(tree);
 	}
 }
 
-int BSTree_set(BSTree *map, void *key, void *value)
+int BSTree_set(BSTree *tree, void *key, void *value)
 {
-	check(map != NULL, "Map cannot be NULL");
+	check(tree != NULL, "Map cannot be NULL");
 
-	if (!map->root)
+	if (!tree->root)
 	{
-		map->root = BSTNode_create(key, value, NULL);
+		tree->root = BSTNode_create(key, value, NULL);
 	}
 	else
 	{
-		return BSTNode_set(map->root, key, value, map->compare_cb);
+		return BSTNode_set(tree->root, key, value, tree->compare_cb);
 	}
 
-	++map->count;
+	++tree->count;
 	return 0;
 
 error:
 	return -1;
 }
 
-void *BSTree_get(BSTree *map, void *key)
+void *BSTree_get(BSTree *tree, void *key)
 {
-	if (map->root)
+	if (tree->root)
 	{
-		BSTNode *node = BSTNode_getNode(map->root, key, map->compare_cb);
+		BSTNode *node = BSTNode_getNode(tree->root, key, tree->compare_cb);
 
 		return node != NULL ? node->value : NULL;
 	}
@@ -77,14 +78,14 @@ void *BSTree_get(BSTree *map, void *key)
 	return NULL;
 }
 
-int BSTree_traverse(BSTree *map, BSTree_traverse_cb traverse_cb)
+int BSTree_traverse(BSTree *tree, BSTree_traverse_cb traverse_cb)
 {
-	check(map != NULL, "Map cannot be NULL");
+	check(tree != NULL, "Map cannot be NULL");
 	check(traverse_cb != NULL, "Traverse callback cannot be NULL");
 
-	if (map->root)
+	if (tree->root)
 	{
-		return BSTNode_traverse(map->root, traverse_cb);
+		return BSTNode_traverse(tree->root, traverse_cb);
 	}
 	else
 	{
@@ -95,16 +96,17 @@ error:
 	return -1;
 }
 
-void *BSTree_delete(BSTree *map, void *key)
+void *BSTree_delete(BSTree *tree, void *key)
 {
-	if (map->root)
+	if (tree->root)
 	{
-		BSTNode *node = BSTNode_getNode(map->root, key, map->compare_cb);
+		BSTNode *node = BSTNode_getNode(tree->root, key, tree->compare_cb);
 		if (!node) return NULL;
 
-		return BSTNode_delete(map, node);
+		return BSTNode_delete(tree, node);
 	}
 
+	--tree->count;
 	return NULL;
 }
 
@@ -221,9 +223,9 @@ error:
 	return NULL;
 }
 
-static void *BSTNode_delete(BSTree *map, BSTNode *node)
+static void *BSTNode_delete(BSTree *tree, BSTNode *node)
 {
-	check(map != NULL, "Map cannot be NULL");
+	check(tree != NULL, "Map cannot be NULL");
 	check(node != NULL, "Node cannot be NULL");
 
 	void *value = node->value;
@@ -232,7 +234,7 @@ static void *BSTNode_delete(BSTree *map, BSTNode *node)
 		BSTNode *nodeToSwap = BSTNode_findRightmostNode(node->left);
 		assert(nodeToSwap->parent);
 
-		BSTNode_replaceParent(map, nodeToSwap, nodeToSwap->left);
+		BSTNode_replaceParent(tree, nodeToSwap, nodeToSwap->left);
 
 		node->key = nodeToSwap->key;
 		node->value = nodeToSwap->value;
@@ -241,12 +243,12 @@ static void *BSTNode_delete(BSTree *map, BSTNode *node)
 	}
 	else if (node->left)
 	{
-		BSTNode_replaceParent(map, node, node->left);
+		BSTNode_replaceParent(tree, node, node->left);
 		free(node);
 	}
 	else
 	{
-		BSTNode_replaceParent(map, node, node->right);
+		BSTNode_replaceParent(tree, node, node->right);
 		free(node);
 	}
 
@@ -288,9 +290,9 @@ static void BSTNode_assignChild(BSTNode *parent, BSTNode *child, BSTNodeChild ch
 	}
 }
 
-static void BSTNode_replaceParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode)
+static void BSTNode_replaceParent(BSTree *tree, BSTNode *childNode, BSTNode *newChildNode)
 {
-	check(map != NULL, "Map cannot be NULL");
+	check(tree != NULL, "Map cannot be NULL");
 	check(childNode != NULL, "Child node cannot be NULL");
 
 	if (childNode->parent)
@@ -302,7 +304,7 @@ static void BSTNode_replaceParent(BSTree *map, BSTNode *childNode, BSTNode *newC
 	}
 	else
 	{
-		map->root = newChildNode;
+		tree->root = newChildNode;
 
 		if (newChildNode)
 		{

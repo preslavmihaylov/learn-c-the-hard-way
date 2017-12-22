@@ -26,13 +26,13 @@ typedef struct BSTree
 typedef int (*BSTree_traverse_cb) (BSTNode *node);
 
 BSTree *BSTree_create(BSTree_compare compare_cb);
-void BSTree_destroy(BSTree *map);
+void BSTree_destroy(BSTree *tree);
 
-int BSTree_set(BSTree *map, void *key, void *value);
-void *BSTree_get(BSTree *map, void *key);
+int BSTree_set(BSTree *tree, void *key, void *value);
+void *BSTree_get(BSTree *tree, void *key);
 
-int BSTree_traverse(BSTree *map, BSTree_traverse_cb traverse_cb);
+int BSTree_traverse(BSTree *tree, BSTree_traverse_cb traverse_cb);
 
-void *BSTree_delete(BSTree *map, void *key);
+void *BSTree_delete(BSTree *tree, void *key);
 
 #endif // LCTHW_BSTREE_H
