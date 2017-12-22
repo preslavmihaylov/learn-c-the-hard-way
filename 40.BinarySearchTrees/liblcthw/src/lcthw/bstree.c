@@ -16,9 +16,9 @@ static int BSTNode_set(BSTNode *node, void *key, void *value, BSTree_compare com
 static BSTNode *BSTNode_create(void *key, void *value, BSTNode *parent);
 static BSTNode *BSTNode_getNode(BSTNode *node, void *key, BSTree_compare compare_cb);
 static void *BSTNode_delete(BSTree *map, BSTNode *node);
-static BSTNode *BSTNode_findRightmost(BSTNode *node);
+static BSTNode *BSTNode_findRightmostNode(BSTNode *node);
 static void BSTNode_assignChild(BSTNode *parent, BSTNode *child, BSTNodeChild childType);
-static void BSTNode_setParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode);
+static void BSTNode_replaceParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode);
 
 BSTree *BSTree_create(BSTree_compare compare_cb)
 {
@@ -58,6 +58,7 @@ int BSTree_set(BSTree *map, void *key, void *value)
 		return BSTNode_set(map->root, key, value, map->compare_cb);
 	}
 
+	++map->count;
 	return 0;
 
 error:
@@ -209,17 +210,11 @@ static BSTNode *BSTNode_getNode(BSTNode *node, void *key, BSTree_compare compare
 	}
 	else if (compareResult > 0)
 	{
-		if (node->right)
-		{
-			return BSTNode_getNode(node->right, key, compare_cb);
-		}
+		return BSTNode_getNode(node->right, key, compare_cb);
 	}
 	else
 	{
-		if (node->left)
-		{
-			return BSTNode_getNode(node->left, key, compare_cb);
-		}
+		return BSTNode_getNode(node->left, key, compare_cb);
 	}
 
 error:
@@ -234,23 +229,24 @@ static void *BSTNode_delete(BSTree *map, BSTNode *node)
 	void *value = node->value;
 	if (node->left && node->right)
 	{
-		BSTNode *nodeToSwap = BSTNode_findRightmost(node->left);
+		BSTNode *nodeToSwap = BSTNode_findRightmostNode(node->left);
 		assert(nodeToSwap->parent);
+
+		BSTNode_replaceParent(map, nodeToSwap, nodeToSwap->left);
 
 		node->key = nodeToSwap->key;
 		node->value = nodeToSwap->value;
 
-		BSTNode_setParent(map, nodeToSwap, nodeToSwap->left);
 		free(nodeToSwap);
 	}
 	else if (node->left)
 	{
-		BSTNode_setParent(map, node, node->left);
+		BSTNode_replaceParent(map, node, node->left);
 		free(node);
 	}
 	else
 	{
-		BSTNode_setParent(map, node, node->right);
+		BSTNode_replaceParent(map, node, node->right);
 		free(node);
 	}
 
@@ -260,11 +256,11 @@ error:
 	return NULL;
 }
 
-static BSTNode *BSTNode_findRightmost(BSTNode *node)
+static BSTNode *BSTNode_findRightmostNode(BSTNode *node)
 {
 	if (node->right)
 	{
-		return BSTNode_findRightmost(node->right);
+		return BSTNode_findRightmostNode(node->right);
 	}
 	else
 	{
@@ -292,7 +288,7 @@ static void BSTNode_assignChild(BSTNode *parent, BSTNode *child, BSTNodeChild ch
 	}
 }
 
-static void BSTNode_setParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode)
+static void BSTNode_replaceParent(BSTree *map, BSTNode *childNode, BSTNode *newChildNode)
 {
 	check(map != NULL, "Map cannot be NULL");
 	check(childNode != NULL, "Child node cannot be NULL");
