@@ -3,4 +3,5 @@
 *.o
 *.swp
 *.tst
+tags
 tests.log
