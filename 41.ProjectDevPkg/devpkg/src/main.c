@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <bstrlib.h>
 
 int main(int argc, char *argv[])
 {
-	printf("Hello world\n");
+	bstring bstr = bfromcstr("Hello world");
+	printf("%s\n", bdata(bstr));
 }
