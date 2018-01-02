@@ -77,17 +77,18 @@ void DArray_free(void *element)
 int DArray_expand(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
-	check(array->contents != NULL, "Array contents cannot be NULL");
+    check(array->contents != NULL, "Array contents cannot be NULL");
 
-	uint32_t old_capacity = array->capacity;
+    uint32_t old_capacity = array->capacity;
 
-	uint32_t new_size = array->capacity + array->expand_rate;
+    uint32_t new_size = array->capacity + array->expand_rate;
 
-	int rc = DArray_resize(array, new_size);
-	check(rc == 0, "Failed to resize array to %u", new_size);
+    int rc = DArray_resize(array, new_size);
+    check(rc == 0, "Failed to resize array to %u", new_size);
 
-	// init unused memory to 0
-	memset(array->contents + old_capacity, 0, array->expand_rate + 1);
+    // init unused memory to 0
+    memset(array->contents + old_capacity, 0, array->expand_rate + 1);
+    
     return 0;
 
 error:
@@ -97,12 +98,12 @@ error:
 int DArray_contract(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
-	check(array->contents != NULL, "Array contents cannot be NULL");
+    check(array->contents != NULL, "Array contents cannot be NULL");
 	
-	uint32_t new_size = array->count < array->expand_rate ? 
-		array->expand_rate : array->count;
+    uint32_t new_size = array->count < array->expand_rate ? 
+	array->expand_rate : array->count;
 
-   	return DArray_resize(array, new_size + 1); 
+    return DArray_resize(array, new_size + 1); 
 
 error:
 	return -1;
@@ -111,27 +112,27 @@ error:
 int DArray_push(DArray *array, void *el)
 {
     check(array != NULL, "Array cannot be NULL");
-	check(array->contents != NULL, "Array contents cannot be NULL");
+    check(array->contents != NULL, "Array contents cannot be NULL");
 	
-	if (array->count >= array->capacity)
-	{
-		DArray_expand(array);
-	}
+    if (array->count >= array->capacity)
+    {
+	DArray_expand(array);
+    }
 
     array->contents[array->count++] = el;
 
     return 0;
 
 error:
-	return -1;
+    return -1;
 }
 
 void *DArray_pop(DArray *array)
 {
     check(array != NULL, "Array cannot be NULL");
-	check(array->contents != NULL, "Array contents cannot be NULL");
+    check(array->contents != NULL, "Array contents cannot be NULL");
 	
-	void *el = array->contents[--array->count];
+    void *el = array->contents[--array->count];
 	if (array->count > array->expand_rate &&
 		array->count % array->expand_rate == 0)
 	{
