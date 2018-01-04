@@ -42,7 +42,16 @@ error:
 
 int DB_list()
 {
+	bstring dbContents = DB_load();
+	check(dbContents != NULL, "Failed to read contents from DB");
+
+	printf("%s", bdata(dbContents));
+
+	bdestroy(dbContents);
 	return 0;
+
+error:
+	return -1;
 }
 
 int DB_update(const char *url)
