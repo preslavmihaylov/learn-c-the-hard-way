@@ -11,7 +11,9 @@ int main(int argc, char *argv[])
 	DB_update("Hello world");
 	bool res1 = DB_find("Hello world");
 	bool res2 = DB_find("Hello worl");
+	bool res3 = DB_find("world");
 	printf("Hello world found? %d\n", res1);
 	printf("Hello worl found? %d\n", res2);
+	printf("world found? %d\n", res3);
 	apr_terminate();
 }

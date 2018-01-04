@@ -7,6 +7,7 @@
 
 static FILE *DB_open(const char *path);
 static void DB_close(FILE *db);
+static bstring DB_load();
 
 int DB_init()
 {
@@ -73,24 +74,23 @@ error: // fallthrough
 
 bool DB_find(const char *url)
 {
-	FILE *db = NULL;
 	bool found = false;
 	bstring dbContents = NULL;
-	bstring term = bfromcstr(url);
+	bstring term = NULL;
 
 	// a whole line must match, not only part of it
+	term = bfromcstr("\n");
+	bcatcstr(term, url);
 	bconchar(term, '\n');
 
-	db = DB_open(DB_FILE);
-	check(db != NULL, "Failed to open db file: %s", DB_FILE);
+	dbContents = DB_load();
+	check(dbContents != NULL, "Failed to read DB contents");
 
-	dbContents = bread((bNread)fread, db);
 	found = binstr(dbContents, 0, term) != BSTR_ERR ? true : false;
 
 error: // fallthrough
 	if (term) bdestroy(term);
 	if (dbContents) bdestroy(dbContents);
-	if (db) DB_close(db);
 
 	return found;
 }
@@ -105,3 +105,23 @@ static void DB_close(FILE *db)
 	fclose(db);
 }
 
+static bstring DB_load()
+{
+	FILE *db = NULL;
+	bstring dbContents = NULL;
+
+	db = DB_open(DB_FILE);
+	check(db != NULL, "Failed to open db file: %s", DB_FILE);
+
+	dbContents = bread((bNread)fread, db);
+	check(dbContents != NULL, "Failed to read db contents");
+
+	DB_close(db);
+	return dbContents;
+
+error:
+	if (db) DB_close(db);
+	if (dbContents) bdestroy(dbContents);
+
+	return NULL;
+}
