@@ -11,7 +11,6 @@ static void DB_close(FILE *db);
 int DB_init()
 {
 	apr_pool_t *p = NULL;
-	apr_pool_initialize();
 	apr_pool_create(&p, NULL);
 
 	if (access(DB_DIR, X_OK | W_OK | R_OK) != 0)
@@ -50,6 +49,12 @@ int DB_update(const char *url)
 	FILE *db = NULL;
 	int rc = -1;
 
+	if (DB_find(url))
+	{
+		log_info("url %s already exists in DB", url);
+		return -1;
+	}
+
 	db = DB_open(DB_FILE);
 	check(db != NULL, "Failed to open db file: %s", DB_FILE);
 
@@ -66,12 +71,28 @@ error: // fallthrough
 	return rc;
 }
 
-int DB_find(const char *url)
+bool DB_find(const char *url)
 {
 	FILE *db = NULL;
+	bool found = false;
+	bstring dbContents = NULL;
+	bstring term = bfromcstr(url);
 
+	// a whole line must match, not only part of it
+	bconchar(term, '\n');
 
-	return 0;
+	db = DB_open(DB_FILE);
+	check(db != NULL, "Failed to open db file: %s", DB_FILE);
+
+	dbContents = bread((bNread)fread, db);
+	found = binstr(dbContents, 0, term) != BSTR_ERR ? true : false;
+
+error: // fallthrough
+	if (term) bdestroy(term);
+	if (dbContents) bdestroy(dbContents);
+	if (db) DB_close(db);
+
+	return found;
 }
 
 static FILE *DB_open(const char *path)
