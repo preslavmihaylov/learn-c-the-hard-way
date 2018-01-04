@@ -48,25 +48,19 @@ int DB_list()
 int DB_update(const char *url)
 {
 	FILE *db = NULL;
-	struct bStream *bstream = NULL;
 	int rc = -1;
 
 	db = DB_open(DB_FILE);
 	check(db != NULL, "Failed to open db file: %s", DB_FILE);
 
-	bstream = bsopen ((bNread)fread, db);
 	bstring bstr = bfromcstr(url);
 	bconchar(bstr, '\n');
 
 	fwrite(bstr->data, blength(bstr), 1, db);
 
-	bsclose(bstream);
-	DB_close(db);
-
 	rc = 0;
 
 error: // fallthrough
-	if (bstream) bsclose(bstream);
 	if (db) DB_close(db);
 
 	return rc;
@@ -74,6 +68,9 @@ error: // fallthrough
 
 int DB_find(const char *url)
 {
+	FILE *db = NULL;
+
+
 	return 0;
 }
 
