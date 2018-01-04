@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <apr_errno.h>
 #include <apr_file_io.h>
+#include <bstrlib.h>
 #include <db.h>
 #include <dbg.h>
 
@@ -46,7 +47,29 @@ int DB_list()
 
 int DB_update(const char *url)
 {
-	return 0;
+	FILE *db = NULL;
+	struct bStream *bstream = NULL;
+	int rc = -1;
+
+	db = DB_open(DB_FILE);
+	check(db != NULL, "Failed to open db file: %s", DB_FILE);
+
+	bstream = bsopen ((bNread)fread, db);
+	bstring bstr = bfromcstr(url);
+	bconchar(bstr, '\n');
+
+	fwrite(bstr->data, blength(bstr), 1, db);
+
+	bsclose(bstream);
+	DB_close(db);
+
+	rc = 0;
+
+error: // fallthrough
+	if (bstream) bsclose(bstream);
+	if (db) DB_close(db);
+
+	return rc;
 }
 
 int DB_find(const char *url)
@@ -56,7 +79,7 @@ int DB_find(const char *url)
 
 static FILE *DB_open(const char *path)
 {
-	return fopen(path, "w+");
+	return fopen(path, "a+");
 }
 
 static void DB_close(FILE *db)
