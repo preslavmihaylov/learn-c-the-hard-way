@@ -4,8 +4,6 @@
 #include <db.h>
 #include <dbg.h>
 
-FILE *db;
-
 static FILE *DB_open(const char *path);
 static void DB_close(FILE *db);
 
@@ -41,16 +39,6 @@ error:
 	return -1;
 }
 
-static FILE *DB_open(const char *path)
-{
-	return fopen(path, "w+");
-}
-
-static void DB_close(FILE *db)
-{
-	fclose(db);
-}
-
 int DB_list()
 {
 	return 0;
@@ -65,3 +53,14 @@ int DB_find(const char *url)
 {
 	return 0;
 }
+
+static FILE *DB_open(const char *path)
+{
+	return fopen(path, "w+");
+}
+
+static void DB_close(FILE *db)
+{
+	fclose(db);
+}
+
