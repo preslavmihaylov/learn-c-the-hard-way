@@ -1,6 +1,29 @@
 #include <shell.h>
 #include <dbg.h>
 
+static int Shell_parse_template(Shell *cmd, va_list vlist);
+
+int Shell_exec(Shell cmd, ...)
+{
+	apr_pool_t *pool;
+	apr_status_t exitStatus;
+	va_list vlist;
+
+	va_start(vlist, cmd);
+	Shell_parse_template(&cmd, vlist);
+	va_end(vlist);
+
+	exitStatus = apr_pool_create(&pool, NULL);
+	check(exitStatus == APR_SUCCESS, "Failed to create pool");
+
+	Shell_run(pool, &cmd);
+
+error: // fallthrough
+	if (pool) apr_pool_destroy(pool);
+
+	return exitStatus;
+}
+
 int Shell_run(apr_pool_t *p, Shell *cmd)
 {
 	apr_procattr_t *attr;
@@ -32,9 +55,33 @@ error:
 	return -1;
 }
 
-int Shell_exec(Shell cmd, ...)
+static int Shell_parse_template(Shell *cmd, va_list vlist)
 {
+	const char * key;
+	const char * value;
+
+	key = va_arg(vlist, const char *);
+
+	while (key != NULL)
+	{
+		value = va_arg(vlist, const char *);
+		check(value != NULL, "Invalid argument supplied");
+
+		for (int argIndex = 0; cmd->args[argIndex] != NULL; argIndex++)
+		{
+			if (strcmp(cmd->args[argIndex], key) == 0)
+			{
+				cmd->args[argIndex] = value;
+			}
+		}
+
+		key = va_arg(vlist, const char *);
+	}
+
 	return 0;
+
+error:
+	return -1;
 }
 
 Shell CLEANUP_SH =
