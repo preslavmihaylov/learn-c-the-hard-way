@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <bstrlib.h>
 #include <db.h>
+#include <shell.h>
 #include <apr_general.h>
 
 int main(int argc, char *argv[])
