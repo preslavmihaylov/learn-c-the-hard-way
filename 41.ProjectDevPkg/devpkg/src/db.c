@@ -59,7 +59,9 @@ int DB_update(const char *url)
 	FILE *db = NULL;
 	int rc = -1;
 
-	check(DB_find(url) == 1, "url %s already exists in DB", url);
+	rc = DB_find(url);
+	check(rc != -1, "Finding %s in DB failed", url);
+	check(rc == 0, "url %s already exists in DB", url);
 
 	db = DB_open(DB_FILE);
 	check(db != NULL, "Failed to open db file: %s", DB_FILE);

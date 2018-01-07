@@ -2,6 +2,7 @@
 #include <commands.h>
 #include <apr_uri.h>
 #include <apr_fnmatch.h>
+#include <bstrlib.h>
 #include <dbg.h>
 #include <shell.h>
 #include <db.h>
@@ -15,6 +16,7 @@ int Command_fetch(const char *url)
 	int rc;
 	apr_uri_t info;
 	apr_pool_t *pool = NULL;
+	const char *dependsPath;
 
 	rc = apr_pool_create(&pool, NULL);
 	check(rc == APR_SUCCESS, "Failed to create a pool");
@@ -41,10 +43,22 @@ int Command_fetch(const char *url)
 	}
 	else if (apr_fnmatch(DEPEND_PAT, info.path, 0) == APR_SUCCESS)
 	{
-		rc = Shell_exec(CURL_SH, "TARGET", DEPENDS_PATH, "URL", url, NULL);
-		check(rc == 0, "Failed to fetch DEPENDS file %s", url);
+		if (info.scheme)
+		{
+			dependsPath = DEPENDS_PATH;
+			rc = Shell_exec(
+				CURL_SH, "TARGET", dependsPath, "URL", url, NULL);
+			check(rc == 0, "Failed to fetch DEPENDS file %s", url);
+		}
+		else
+		{
+			dependsPath = url;
+		}
 
-		// TODO: Invoke Command_depends
+		rc = Command_depends(dependsPath);
+		check(rc == 0, "Failed installing dependencies of %s", url);
+
+		return 0;
 	}
 	else
 	{
@@ -75,7 +89,7 @@ int Command_install(
 
 	if (rc == 1)
 	{
-		log_info("package already installed");
+		log_info("package %s already installed", url);
 		return 0;
 	}
 
@@ -87,6 +101,10 @@ int Command_install(
 		rc = Command_build(url, NULL, NULL, NULL);
 		check(rc == 0, "Failed building package");
 	}
+	else
+	{
+		// DEPENDS already built
+	}
 
 	rc = Shell_exec(CLEANUP_SH, NULL);
 	check(rc == 0, "Failed cleanup after install");
@@ -96,9 +114,39 @@ error: // fallthrough
 	return rc;
 }
 
-int Command_depends(apr_pool_t *p, const char *path)
+int Command_depends(const char *path)
 {
-	return -1;
+	FILE *dependsFile = NULL;
+	struct bStream *stream = NULL;
+	bstring line = bfromcstr("");
+	int rc = 0;
+
+	check(access(path, X_OK | W_OK | R_OK) == 0,
+		"Cannot access DEPENDS file: %s", path);
+
+	dependsFile = fopen(path, "r");
+	check(dependsFile != NULL,
+		"Failed to fopen DEPENDS file: %s", path);
+
+	stream = bsopen((bNread)fread, dependsFile);
+	check(stream != NULL, "Failed to initialize bstream");
+
+	while (bsreadln(line, stream, '\n') == BSTR_OK)
+	{
+		btrimws(line);
+
+		log_info("Building dependent package %s", bdata(line));
+		rc = Command_install(bdata(line), NULL, NULL, NULL);
+		check(rc == 0,
+			"Failed installing dependent package %s", bdata(line));
+	}
+
+error: // fallthrough
+	if (dependsFile) fclose(dependsFile);
+	if (stream) bsclose(stream);
+	if (line) bdestroy(line);
+
+	return rc;
 }
 
 int Command_build(

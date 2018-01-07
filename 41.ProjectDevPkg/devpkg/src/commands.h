@@ -27,7 +27,7 @@ int Command_fetch(const char *url);
 int Command_install(
 	const char *url, const char *configure_opts, const char *make_opts,
 	const char *install_opts);
-int Command_depends(apr_pool_t *p, const char *path);
+int Command_depends(const char *path);
 int Command_build(
 	const char *url, const char *configure_opts, const char *make_opts,
 	const char *install_opts);
