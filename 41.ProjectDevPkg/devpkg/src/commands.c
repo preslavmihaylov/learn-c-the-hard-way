@@ -10,11 +10,16 @@ static int Command_fetchAndUntar(
 	apr_pool_t *pool, const char *urlScheme, const char *url,
 	const char *targetSrcDir, const char *targetBuildDir);
 
-int Command_fetch(apr_pool_t *p, const char *url)
+int Command_fetch(const char *url)
 {
 	int rc;
 	apr_uri_t info;
-	rc = apr_uri_parse(p, url, &info);
+	apr_pool_t *pool = NULL;
+
+	rc = apr_pool_create(&pool, NULL);
+	check(rc == APR_SUCCESS, "Failed to create a pool");
+
+	rc = apr_uri_parse(pool, url, &info);
 	check(rc == APR_SUCCESS, "Failed to parse URL: %s", url);
 
 	if (apr_fnmatch(GIT_PAT, info.path, 0) == APR_SUCCESS)
@@ -25,13 +30,13 @@ int Command_fetch(apr_pool_t *p, const char *url)
 	else if (apr_fnmatch(TAR_GZ_PAT, info.path, 0) == APR_SUCCESS)
 	{
 		rc = Command_fetchAndUntar(
-			p, info.scheme, url, TAR_GZ_SRC, BUILD_DIR);
+			pool, info.scheme, url, TAR_GZ_SRC, BUILD_DIR);
 		check(rc == 0, "Failed fetch and untar");
 	}
 	else if (apr_fnmatch(TAR_BZ2_PAT, info.path, 0) == APR_SUCCESS)
 	{
 		rc = Command_fetchAndUntar(
-			p, info.scheme, url, TAR_BZ2_SRC, BUILD_DIR);
+			pool, info.scheme, url, TAR_BZ2_SRC, BUILD_DIR);
 		check(rc == 0, "Failed fetch and untar");
 	}
 	else if (apr_fnmatch(DEPEND_PAT, info.path, 0) == APR_SUCCESS)
@@ -46,15 +51,49 @@ int Command_fetch(apr_pool_t *p, const char *url)
 		sentinel("Don't know how to handle this type of file %s", url);
 	}
 
+	if (pool) apr_pool_destroy(pool);
+
+	return 1;
+
 error: // fallthrough
-	return rc;
+	if (pool) apr_pool_destroy(pool);
+
+	return -1;
 }
 
 int Command_install(
-	apr_pool_t *p, const char *url, const char *configure_opts,
-	const char *make_opts, const char *install_opts)
+	const char *url, const char *configure_opts, const char *make_opts,
+	const char *install_opts)
 {
-	return -1;
+	int rc = 0;
+
+	rc = Shell_exec(CLEANUP_SH, NULL);
+	check(rc == 0, "Failed cleanup before install");
+
+	rc = DB_find(url);
+	check(rc != -1, "Failed querying database");
+
+	if (rc == 1)
+	{
+		log_info("package already installed");
+		return 0;
+	}
+
+	rc = Command_fetch(url);
+	check(rc != -1, "Failed fetching");
+
+	if (rc == 1)
+	{
+		rc = Command_build(url, NULL, NULL, NULL);
+		check(rc == 0, "Failed building package");
+	}
+
+	rc = Shell_exec(CLEANUP_SH, NULL);
+	check(rc == 0, "Failed cleanup after install");
+
+error: // fallthrough
+
+	return rc;
 }
 
 int Command_depends(apr_pool_t *p, const char *path)
@@ -63,8 +102,8 @@ int Command_depends(apr_pool_t *p, const char *path)
 }
 
 int Command_build(
-	apr_pool_t *p, const char *url, const char *configure_opts,
-	const char *make_opts, const char *install_opts)
+	const char *url, const char *configure_opts, const char *make_opts,
+	const char *install_opts)
 {
 	int rc = 0;
 
@@ -80,9 +119,9 @@ int Command_build(
 	rc = Shell_exec(MAKE_SH, "OPTS", make_opts, NULL);
 	check(rc == 0, "Failed make step");
 
-	//install_opts = install_opts ? install_opts : "install";
-	//rc = Shell_exec(INSTALL_SH, "OPTS", install_opts, NULL);
-	//check(rc == 0, "Failed install step");
+	install_opts = install_opts ? install_opts : "install";
+	rc = Shell_exec(INSTALL_SH, "OPTS", install_opts, NULL);
+	check(rc == 0, "Failed install step");
 
 	rc = Shell_exec(CLEANUP_SH, NULL);
 	check(rc == 0, "Failed cleanup step");
