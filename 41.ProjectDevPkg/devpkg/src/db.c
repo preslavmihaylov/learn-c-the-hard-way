@@ -59,11 +59,7 @@ int DB_update(const char *url)
 	FILE *db = NULL;
 	int rc = -1;
 
-	if (DB_find(url))
-	{
-		log_info("url %s already exists in DB", url);
-		return -1;
-	}
+	check(DB_find(url) == 1, "url %s already exists in DB", url);
 
 	db = DB_open(DB_FILE);
 	check(db != NULL, "Failed to open db file: %s", DB_FILE);
@@ -81,9 +77,9 @@ error: // fallthrough
 	return rc;
 }
 
-bool DB_find(const char *url)
+int DB_find(const char *url)
 {
-	bool found = false;
+	int found = 0;
 	bstring dbContents = NULL;
 	bstring term = NULL;
 
@@ -95,13 +91,18 @@ bool DB_find(const char *url)
 	dbContents = DB_load();
 	check(dbContents != NULL, "Failed to read DB contents");
 
-	found = binstr(dbContents, 0, term) != BSTR_ERR ? true : false;
+	found = binstr(dbContents, 0, term) != BSTR_ERR ? 1 : 0;
+
+	if (term) bdestroy(term);
+	if (dbContents) bdestroy(dbContents);
+
+	return found;
 
 error: // fallthrough
 	if (term) bdestroy(term);
 	if (dbContents) bdestroy(dbContents);
 
-	return found;
+	return -1;
 }
 
 static FILE *DB_open(const char *path)
