@@ -33,11 +33,11 @@ int DB_init()
 	}
 
 	apr_pool_destroy(p);
-	return 0;
+	return DB_OK;
 
 error:
 	apr_pool_destroy(p);
-	return -1;
+	return DB_ERR;
 }
 
 int DB_list()
@@ -48,10 +48,10 @@ int DB_list()
 	printf("%s", bdata(dbContents));
 
 	bdestroy(dbContents);
-	return 0;
+	return DB_OK;
 
 error:
-	return -1;
+	return DB_ERR;
 }
 
 int DB_update(const char *url)
@@ -60,8 +60,8 @@ int DB_update(const char *url)
 	int rc = -1;
 
 	rc = DB_find(url);
-	check(rc != -1, "Finding %s in DB failed", url);
-	check(rc == 0, "url %s already exists in DB", url);
+	check(rc != DB_ERR, "Finding %s in DB failed", url);
+	check(rc != DB_FOUND, "url %s already exists in DB", url);
 
 	db = DB_open(DB_FILE);
 	check(db != NULL, "Failed to open db file: %s", DB_FILE);
@@ -71,12 +71,12 @@ int DB_update(const char *url)
 
 	fwrite(bstr->data, blength(bstr), 1, db);
 
-	rc = 0;
-
-error: // fallthrough
 	if (db) DB_close(db);
+	return DB_OK;
 
-	return rc;
+error:
+	if (db) DB_close(db);
+	return DB_ERR;
 }
 
 int DB_find(const char *url)
@@ -93,18 +93,16 @@ int DB_find(const char *url)
 	dbContents = DB_load();
 	check(dbContents != NULL, "Failed to read DB contents");
 
-	found = binstr(dbContents, 0, term) != BSTR_ERR ? 1 : 0;
+	found = binstr(dbContents, 0, term) != BSTR_ERR ? DB_FOUND : DB_NOT_FOUND;
 
 	if (term) bdestroy(term);
 	if (dbContents) bdestroy(dbContents);
-
 	return found;
 
-error: // fallthrough
+error:
 	if (term) bdestroy(term);
 	if (dbContents) bdestroy(dbContents);
-
-	return -1;
+	return DB_ERR;
 }
 
 static FILE *DB_open(const char *path)

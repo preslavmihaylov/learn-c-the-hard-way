@@ -23,6 +23,10 @@ enum CommandType
 	COMMAND_BUILD
 };
 
+#define COMMAND_ERR -1
+#define COMMAND_OK 0
+#define COMMAND_NEEDS_INSTALL 1
+
 int Command_fetch(const char *url);
 int Command_install(
 	const char *url, const char *configure_opts, const char *make_opts,

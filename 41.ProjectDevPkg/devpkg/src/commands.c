@@ -58,7 +58,7 @@ int Command_fetch(const char *url)
 		rc = Command_depends(dependsPath);
 		check(rc == 0, "Failed installing dependencies of %s", url);
 
-		return 0;
+		return COMMAND_OK;
 	}
 	else
 	{
@@ -66,13 +66,11 @@ int Command_fetch(const char *url)
 	}
 
 	if (pool) apr_pool_destroy(pool);
+	return COMMAND_NEEDS_INSTALL;
 
-	return 1;
-
-error: // fallthrough
+error:
 	if (pool) apr_pool_destroy(pool);
-
-	return -1;
+	return COMMAND_ERR;
 }
 
 int Command_install(
@@ -85,9 +83,9 @@ int Command_install(
 	check(rc == 0, "Failed cleanup before install");
 
 	rc = DB_find(url);
-	check(rc != -1, "Failed querying database");
+	check(rc != DB_ERR, "Failed querying database");
 
-	if (rc == 1)
+	if (rc == DB_FOUND)
 	{
 		log_info("package %s already installed", url);
 		return 0;
@@ -109,9 +107,11 @@ int Command_install(
 	rc = Shell_exec(CLEANUP_SH, NULL);
 	check(rc == 0, "Failed cleanup after install");
 
-error: // fallthrough
+	return COMMAND_OK;
 
-	return rc;
+error:
+
+	return COMMAND_ERR;
 }
 
 int Command_depends(const char *path)
@@ -141,12 +141,18 @@ int Command_depends(const char *path)
 			"Failed installing dependent package %s", bdata(line));
 	}
 
+	if (dependsFile) fclose(dependsFile);
+	if (stream) bsclose(stream);
+	if (line) bdestroy(line);
+
+	return COMMAND_OK;
+
 error: // fallthrough
 	if (dependsFile) fclose(dependsFile);
 	if (stream) bsclose(stream);
 	if (line) bdestroy(line);
 
-	return rc;
+	return COMMAND_ERR;
 }
 
 int Command_build(
@@ -175,10 +181,12 @@ int Command_build(
 	check(rc == 0, "Failed cleanup step");
 
 	rc = DB_update(url);
-	check(rc == 0, "Failed to add package to database");
+	check(rc == DB_OK, "Failed to add package to database");
 
-error: // fallthrough
-	return rc;
+	return COMMAND_OK;
+
+error:
+	return COMMAND_ERR;
 }
 
 static int Command_fetchAndUntar(
@@ -206,7 +214,9 @@ static int Command_fetchAndUntar(
 	rc = Shell_exec(tarCommand, "FILE", targetSrcDir, NULL);
 	check(rc == 0, "Failed to untar %s", targetSrcDir);
 
-error: // fallthrough
-	return rc;
+	return COMMAND_OK;
+
+error:
+	return COMMAND_ERR;
 }
 
