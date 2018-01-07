@@ -6,17 +6,20 @@ static int Shell_parse_template(Shell *cmd, va_list vlist);
 int Shell_exec(Shell cmd, ...)
 {
 	apr_pool_t *pool;
-	apr_status_t exitStatus;
+	int exitStatus;
 	va_list vlist;
 
 	va_start(vlist, cmd);
-	Shell_parse_template(&cmd, vlist);
+
+	exitStatus = Shell_parse_template(&cmd, vlist);
+	check(exitStatus == 0, "Failed to parse shell template");
+
 	va_end(vlist);
 
 	exitStatus = apr_pool_create(&pool, NULL);
 	check(exitStatus == APR_SUCCESS, "Failed to create pool");
 
-	Shell_run(pool, &cmd);
+	exitStatus = Shell_run(pool, &cmd);
 
 error: // fallthrough
 	if (pool) apr_pool_destroy(pool);
@@ -99,11 +102,18 @@ Shell GIT_SH =
 	.args = { "git", "clone", "URL", "pkg-build", NULL }
 };
 
-Shell TAR_SH =
+Shell TAR_GZ_SH =
 {
 	.dir = "/tmp/pkg-build",
 	.exe = "tar",
 	.args = { "tar", "-xzf", "FILE", "--strip-components", "1", NULL }
+};
+
+Shell TAR_BZ2_SH =
+{
+	.dir = "/tmp/pkg-build",
+	.exe = "tar",
+	.args = { "tar", "-xjf", "FILE", "--strip-components", "1", NULL }
 };
 
 Shell CURL_SH =
