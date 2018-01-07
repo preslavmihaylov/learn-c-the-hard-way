@@ -68,7 +68,6 @@ static int Shell_parse_template(Shell *cmd, va_list vlist)
 	while (key != NULL)
 	{
 		value = va_arg(vlist, const char *);
-		check(value != NULL, "Invalid argument supplied");
 
 		for (int argIndex = 0; cmd->args[argIndex] != NULL; argIndex++)
 		{
@@ -82,9 +81,6 @@ static int Shell_parse_template(Shell *cmd, va_list vlist)
 	}
 
 	return 0;
-
-error:
-	return -1;
 }
 
 Shell CLEANUP_SH =

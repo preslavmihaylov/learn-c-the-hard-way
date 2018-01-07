@@ -1,8 +1,10 @@
+#include <unistd.h>
 #include <commands.h>
 #include <apr_uri.h>
 #include <apr_fnmatch.h>
 #include <dbg.h>
 #include <shell.h>
+#include <db.h>
 
 static int Command_fetchAndUntar(
 	apr_pool_t *pool, const char *urlScheme, const char *url,
@@ -36,6 +38,8 @@ int Command_fetch(apr_pool_t *p, const char *url)
 	{
 		rc = Shell_exec(CURL_SH, "TARGET", DEPENDS_PATH, "URL", url, NULL);
 		check(rc == 0, "Failed to fetch DEPENDS file %s", url);
+
+		// TODO: Invoke Command_depends
 	}
 	else
 	{
@@ -62,7 +66,32 @@ int Command_build(
 	apr_pool_t *p, const char *url, const char *configure_opts,
 	const char *make_opts, const char *install_opts)
 {
-	return -1;
+	int rc = 0;
+
+	rc = access(BUILD_DIR, X_OK | W_OK | R_OK);
+	check(rc == 0, "Cannot access build directory: %s", BUILD_DIR);
+
+	if (access(CONFIG_SCRIPT, X_OK | W_OK | R_OK) == 0)
+	{
+		rc = Shell_exec(CONFIGURE_SH, "OPTS", configure_opts, NULL);
+		check(rc == 0, "Failed configure step");
+	}
+
+	rc = Shell_exec(MAKE_SH, "OPTS", make_opts, NULL);
+	check(rc == 0, "Failed make step");
+
+	//install_opts = install_opts ? install_opts : "install";
+	//rc = Shell_exec(INSTALL_SH, "OPTS", install_opts, NULL);
+	//check(rc == 0, "Failed install step");
+
+	rc = Shell_exec(CLEANUP_SH, NULL);
+	check(rc == 0, "Failed cleanup step");
+
+	rc = DB_update(url);
+	check(rc == 0, "Failed to add package to database");
+
+error: // fallthrough
+	return rc;
 }
 
 static int Command_fetchAndUntar(
