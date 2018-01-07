@@ -5,10 +5,10 @@
 #include <shell.h>
 
 static int Command_fetchAndUntar(
-	apr_pool_t *pool, const char *url, const char *targetSrcDir,
-	const char *targetBuildDir);
+	apr_pool_t *pool, const char *urlScheme, const char *url,
+	const char *targetSrcDir, const char *targetBuildDir);
 
-int Command_fetch(apr_pool_t *p, const char *url, int fetch_only)
+int Command_fetch(apr_pool_t *p, const char *url)
 {
 	int rc;
 	apr_uri_t info;
@@ -22,12 +22,14 @@ int Command_fetch(apr_pool_t *p, const char *url, int fetch_only)
 	}
 	else if (apr_fnmatch(TAR_GZ_PAT, info.path, 0) == APR_SUCCESS)
 	{
-		rc = Command_fetchAndUntar(p, url, TAR_GZ_SRC, BUILD_DIR);
+		rc = Command_fetchAndUntar(
+			p, info.scheme, url, TAR_GZ_SRC, BUILD_DIR);
 		check(rc == 0, "Failed fetch and untar");
 	}
 	else if (apr_fnmatch(TAR_BZ2_PAT, info.path, 0) == APR_SUCCESS)
 	{
-		rc = Command_fetchAndUntar(p, url, TAR_BZ2_SRC, BUILD_DIR);
+		rc = Command_fetchAndUntar(
+			p, info.scheme, url, TAR_BZ2_SRC, BUILD_DIR);
 		check(rc == 0, "Failed fetch and untar");
 	}
 	else if (apr_fnmatch(DEPEND_PAT, info.path, 0) == APR_SUCCESS)
@@ -45,11 +47,8 @@ error: // fallthrough
 }
 
 int Command_install(
-	apr_pool_t *p,
-	const char *url,
-	const char *configure_opts,
-	const char *make_opts,
-	const char *install_opts)
+	apr_pool_t *p, const char *url, const char *configure_opts,
+	const char *make_opts, const char *install_opts)
 {
 	return -1;
 }
@@ -60,26 +59,26 @@ int Command_depends(apr_pool_t *p, const char *path)
 }
 
 int Command_build(
-	apr_pool_t *p,
-	const char *url,
-	const char *configure_opts,
-	const char *make_opts,
-	const char *install_opts)
+	apr_pool_t *p, const char *url, const char *configure_opts,
+	const char *make_opts, const char *install_opts)
 {
 	return -1;
 }
 
 static int Command_fetchAndUntar(
-	apr_pool_t *pool, const char *url, const char *targetSrcDir,
-	const char *targetBuildDir)
+	apr_pool_t *pool, const char *urlScheme, const char *url,
+	const char *targetSrcDir, const char *targetBuildDir)
 {
 	int rc = 0;
 	Shell tarCommand =
 		apr_fnmatch(TAR_GZ_PAT, url, 0) == APR_SUCCESS ?
 			TAR_GZ_SH : TAR_BZ2_SH;
 
-	rc = Shell_exec(CURL_SH, "TARGET", targetSrcDir, "URL", url, NULL);
-	check(rc == 0, "Failed to curl %s into %s", url, targetSrcDir);
+	if (urlScheme)
+	{
+		rc = Shell_exec(CURL_SH, "TARGET", targetSrcDir, "URL", url, NULL);
+		check(rc == 0, "Failed to curl %s into %s", url, targetSrcDir);
+	}
 
 	rc = apr_dir_make_recursive(targetBuildDir,
 		APR_FPROT_GREAD | APR_FPROT_GWRITE | APR_FPROT_GEXECUTE |
