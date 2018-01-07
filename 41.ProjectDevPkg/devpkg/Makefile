@@ -19,17 +19,21 @@ TARGET=$(BUILD_DIR)/devpkg
 
 all: clean target
 
-install: all
-	install -d$(DESTDIR)/$(PREFIX)/bin/
-	install devpkg $(DESTDIR)/$(PREFIX)/bin/
-
-target: build $(TARGET)
+target: build $(TARGET) ctags_install
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $(OBJECTS) $(LIBS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
+
+install: all
+	install -d$(DESTDIR)/$(PREFIX)/bin/
+	install devpkg $(DESTDIR)/$(PREFIX)/bin/
+
+ctags_install:
+	$(CC) -M $(INCLUDES) $(SOURCES) > .includes
+	ctags_with_dep.sh .includes
 
 build:
 	mkdir -p $(BUILD_DIR)
