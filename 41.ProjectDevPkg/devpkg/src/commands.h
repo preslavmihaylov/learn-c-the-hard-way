@@ -13,15 +13,15 @@
 #define TAR_BZ2_PAT "*.tar.bz2"
 #define CONFIG_SCRIPT "/tmp/pkg-build/configure"
 
-enum CommandType
+typedef enum
 {
-	COMMAND_NONE,
-	COMMAND_INSTALL,
-	COMMAND_LIST,
-	COMMAND_FETCH,
-	COMMAND_INIT,
-	COMMAND_BUILD
-};
+    COMMAND_NONE,
+    COMMAND_INSTALL,
+    COMMAND_LIST,
+    COMMAND_FETCH,
+    COMMAND_INIT,
+    COMMAND_BUILD
+} CommandType;
 
 #define COMMAND_ERR -1
 #define COMMAND_OK 0
@@ -29,11 +29,11 @@ enum CommandType
 
 int Command_fetch(const char *url);
 int Command_install(
-	const char *url, const char *configure_opts, const char *make_opts,
-	const char *install_opts);
+    const char *url, const char *configure_opts, const char *make_opts,
+    const char *install_opts);
 int Command_depends(const char *path);
 int Command_build(
-	const char *url, const char *configure_opts, const char *make_opts,
-	const char *install_opts);
+    const char *url, const char *configure_opts, const char *make_opts,
+    const char *install_opts);
 
 #endif // _DEVPKG_COMMANDS_H
