@@ -26,11 +26,41 @@ double expect_stddev = 3.547868;
 
 char *test_operations()
 {
+    int i = 0;
+    Stats *stats = Stats_create();
+    mu_assert(stats != NULL, "Failed to create stats.");
+
+    for (i = 0; i < NUM_SAMPLES; i++)
+    {
+        Stats_sample(stats, samples[i]);
+    }
+
+    Stats_dump(stats);
+
+    mu_assert(EQ(stats->sumsq, expect.sumsq, 3), "sumsq not valid");
+    mu_assert(EQ(stats->sum, expect.sum, 3), "sum not valid");
+    mu_assert(EQ(stats->min, expect.min, 3), "min not valid");
+    mu_assert(EQ(stats->max, expect.max, 3), "max not valid");
+    mu_assert(EQ(stats->count, expect.count, 3), "count not valid");
+    mu_assert(EQ(Stats_mean(stats), expect_mean, 3), "mean not valid");
+    mu_assert(EQ(Stats_stddev(stats), expect_stddev, 3), "stddev not valid");
+
     return NULL;
 }
 
 char *test_recreate()
 {
+    Stats *stats = Stats_recreate(
+        expect.sum, expect.sumsq, expect.count, expect.min, expect.max);
+
+    mu_assert(stats->sum == expect.sum, "sum not equal");
+    mu_assert(stats->sumsq == expect.sumsq, "sumsq not equal");
+    mu_assert(stats->count == expect.count, "count not equal");
+    mu_assert(stats->min == expect.min, "min not equal");
+    mu_assert(stats->max == expect.max, "max not equal");
+    mu_assert(EQ(Stats_mean(stats), expect_mean, 3), "mean not valid");
+    mu_assert(EQ(Stats_stddev(stats), expect_stddev, 3), "stddev not valid");
+
     return NULL;
 }
 
