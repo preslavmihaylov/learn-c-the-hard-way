@@ -4,12 +4,12 @@ BUILD_DIR=./build
 TESTS_DIR=./tests
 
 CC=gcc
-INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR) 
+INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR)
 CFLAGS=-g -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function \
 		  -Wno-unused-parameter -Wno-address -rdynamic -DNDEBUG -Du_char="unsigned char"\
 		  $(INCLUDES) $(OPTFLAGS)
 
-LIBS=-ldl -lbsd $(OPTLIBS)
+LIBS=-ldl -lm -lbsd $(OPTLIBS)
 
 SOURCES=$(wildcard src/**/*.c src/*.c)
 OBJECTS=$(SOURCES:%.c=%.o)
@@ -39,7 +39,7 @@ $(TESTS_DIR)/%.tst: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@ $(LIBS)
 
 .PHONY: tests
-tests: $(TESTS) 
+tests: $(TESTS)
 	sh ./tests/runtests.sh
 
 build:
