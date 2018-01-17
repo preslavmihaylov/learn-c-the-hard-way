@@ -12,7 +12,9 @@ typedef struct Stats
     double max;
 } Stats;
 
-Stats *Stats_recreate(double sum, double sumsq, uint32_t count, double min, double max);
+Stats *Stats_recreate(
+    double sum, double sumsq, uint32_t count,
+    double min, double max);
 Stats *Stats_create();
 
 double Stats_mean(Stats *stats);

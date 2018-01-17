@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <lcthw/stats.h>
 
-Stats *Stats_recreate(double sum, double sumsq, uint32_t count, double min, double max)
+Stats *Stats_recreate(
+    double sum, double sumsq, uint32_t count,
+    double min, double max)
 {
     return NULL;
 }
