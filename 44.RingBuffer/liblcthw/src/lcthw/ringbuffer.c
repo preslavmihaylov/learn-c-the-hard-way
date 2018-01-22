@@ -35,33 +35,38 @@ void RingBuffer_destroy(RingBuffer *buffer)
 
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
 {
+    memcpy(target, buffer->buffer, amount);
+    target[amount] = 0;
+
     return 0;
 }
 
 int RingBuffer_write(RingBuffer *buffer, char *data, int length)
 {
+    memcpy(buffer->buffer + buffer->end, data, length);
+    buffer->end += length;
+
     return 0;
 }
 
-
 bool RingBuffer_empty(RingBuffer *buffer)
 {
-    return true;
+    return RingBuffer_available_space(buffer) == buffer->length;
 }
 
 bool RingBuffer_full(RingBuffer *buffer)
 {
-    return true;
+    return buffer->end == buffer->length;
 }
 
 int RingBuffer_available_data(RingBuffer *buffer)
 {
-    return 0;
+    return buffer->end;
 }
 
 int RingBuffer_available_space(RingBuffer *buffer)
 {
-    return 0;
+    return (buffer->length - buffer->end);
 }
 
 bstring RingBuffer_gets(RingBuffer *buffer, int amount)
