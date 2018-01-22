@@ -1,13 +1,36 @@
+#include <stdlib.h>
 #include <lcthw/ringbuffer.h>
+#include <lcthw/dbg.h>
 
 RingBuffer *RingBuffer_create(int length)
 {
+    RingBuffer *buffer = calloc(1, sizeof(RingBuffer));
+    check_mem(buffer);
+
+    check(length > 0, "Length must be positive");
+
+    buffer->buffer = calloc(length, sizeof(char*));
+    check_mem(buffer->buffer);
+
+    buffer->length = length;
+    buffer->start = 0;
+    buffer->end = 0;
+
+    return buffer;
+
+error:
+    if (buffer) RingBuffer_destroy(buffer);
+
     return NULL;
 }
 
 void RingBuffer_destroy(RingBuffer *buffer)
 {
-    return;
+    if (buffer)
+    {
+        if (buffer->buffer) free(buffer->buffer);
+        free(buffer);
+    }
 }
 
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
