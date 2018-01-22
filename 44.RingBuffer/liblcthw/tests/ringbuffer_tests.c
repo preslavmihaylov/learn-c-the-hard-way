@@ -11,6 +11,15 @@ char *test_create()
     return NULL;
 }
 
+char *test_read_write()
+{
+
+}
+
+char *test_destroy()
+{
+    RingBuffer_destroy(buffer);
+}
 /*
 RingBuffer *RingBuffer_create(int length);
 void RingBuffer_destroy(RingBuffer *buffer);
@@ -30,6 +39,8 @@ char *all_tests()
     mu_suite_start();
 
     mu_run_test(test_create);
+    mu_run_test(test_read_write);
+    mu_run_test(test_destroy);
 
     return NULL;
 }
