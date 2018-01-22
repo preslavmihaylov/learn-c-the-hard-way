@@ -35,6 +35,7 @@ void RingBuffer_destroy(RingBuffer *buffer)
 
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
 {
+    // TODO: read moves buffer start pos forward
     memcpy(target, buffer->buffer, amount);
     target[amount] = 0;
 
