@@ -35,7 +35,14 @@ void RingBuffer_destroy(RingBuffer *buffer)
 
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
 {
-    // TODO: read moves buffer start pos forward
+    memcpy(target, buffer->buffer, amount);
+    target[amount] = 0;
+
+    return 0;
+}
+
+int RingBuffer_peek(RingBuffer *buffer, char *target, int amount)
+{
     memcpy(target, buffer->buffer, amount);
     target[amount] = 0;
 

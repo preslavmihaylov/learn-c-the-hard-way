@@ -15,6 +15,7 @@ typedef struct
 RingBuffer *RingBuffer_create(int length);
 void RingBuffer_destroy(RingBuffer *buffer);
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount);
+int RingBuffer_peek(RingBuffer *buffer, char *target, int amount);
 int RingBuffer_write(RingBuffer *buffer, char *data, int length);
 
 bool RingBuffer_empty(RingBuffer *buffer);
