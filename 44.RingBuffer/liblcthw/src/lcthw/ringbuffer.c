@@ -12,7 +12,8 @@ RingBuffer *RingBuffer_create(int length)
     buffer->buffer = calloc(length, sizeof(char*));
     check_mem(buffer->buffer);
 
-    buffer->length = length;
+    buffer->capacity = length;
+    buffer->count = 0;
     buffer->start = 0;
     buffer->end = 0;
 
@@ -51,34 +52,36 @@ int RingBuffer_peek(RingBuffer *buffer, char *target, int amount)
 
 int RingBuffer_write(RingBuffer *buffer, char *data, int length)
 {
-    memcpy(buffer->buffer + buffer->end, data, length);
-    buffer->end += length;
+    int index = 0;
+    while (index < length)
+    {
+        buffer->buffer[buffer->end] = data[index++];
+        buffer->end = (buffer->end + 1) % buffer->capacity;
+    }
+
+    buffer->count += length;
+    buffer->count = (buffer->capacity < buffer->count) ? buffer->capacity : buffer->count;
 
     return 0;
 }
 
 bool RingBuffer_empty(RingBuffer *buffer)
 {
-    return RingBuffer_available_space(buffer) == buffer->length;
+    return buffer->count == 0;
 }
 
 bool RingBuffer_full(RingBuffer *buffer)
 {
-    return buffer->end == buffer->length;
+    return buffer->count == buffer->capacity;
 }
 
 int RingBuffer_available_data(RingBuffer *buffer)
 {
-    return buffer->end;
+    return buffer->count;
 }
 
 int RingBuffer_available_space(RingBuffer *buffer)
 {
-    return (buffer->length - buffer->end);
-}
-
-bstring RingBuffer_gets(RingBuffer *buffer, int amount)
-{
-    return NULL;
+    return buffer->capacity - buffer->count;
 }
 
