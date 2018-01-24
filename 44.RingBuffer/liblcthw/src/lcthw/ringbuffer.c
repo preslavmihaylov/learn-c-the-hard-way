@@ -2,12 +2,16 @@
 #include <lcthw/ringbuffer.h>
 #include <lcthw/dbg.h>
 
+// TODO: NULL Checks for buffer & target in all functions
+// TODO: length > 0 checks in write/read/peek
+
 RingBuffer *RingBuffer_create(uint32_t length)
 {
-    RingBuffer *buffer = calloc(1, sizeof(RingBuffer));
-    check_mem(buffer);
-
+    RingBuffer *buffer = NULL;
     check(length > 0, "Length must be positive");
+
+    buffer = calloc(1, sizeof(RingBuffer));
+    check_mem(buffer);
 
     buffer->buffer = calloc(length, sizeof(char*));
     check_mem(buffer->buffer);
