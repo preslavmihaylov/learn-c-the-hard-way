@@ -44,7 +44,12 @@ int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
 
 int RingBuffer_peek(RingBuffer *buffer, char *target, int amount)
 {
-    memcpy(target, buffer->buffer, amount);
+    for (int index = 0; index < amount; index++)
+    {
+        int bufferIndex = (buffer->start + index) % buffer->capacity;
+        target[index] = buffer->buffer[bufferIndex];
+    }
+
     target[amount] = 0;
 
     return 0;
@@ -52,15 +57,17 @@ int RingBuffer_peek(RingBuffer *buffer, char *target, int amount)
 
 int RingBuffer_write(RingBuffer *buffer, char *data, int length)
 {
-    int index = 0;
-    while (index < length)
+    for (int index = 0; index < length; index++)
     {
-        buffer->buffer[buffer->end] = data[index++];
-        buffer->end = (buffer->end + 1) % buffer->capacity;
-    }
+        if (RingBuffer_full(buffer))
+        {
+            buffer->start = (buffer->start + 1) % buffer->capacity;
+        }
 
-    buffer->count += length;
-    buffer->count = (buffer->capacity < buffer->count) ? buffer->capacity : buffer->count;
+        buffer->buffer[buffer->end] = data[index];
+        buffer->end = (buffer->end + 1) % buffer->capacity;
+        buffer->count = (buffer->count < buffer->capacity) ? buffer->count + 1 : buffer->count;
+    }
 
     return 0;
 }
