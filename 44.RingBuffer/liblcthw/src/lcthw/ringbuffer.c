@@ -2,7 +2,7 @@
 #include <lcthw/ringbuffer.h>
 #include <lcthw/dbg.h>
 
-RingBuffer *RingBuffer_create(int length)
+RingBuffer *RingBuffer_create(uint32_t length)
 {
     RingBuffer *buffer = calloc(1, sizeof(RingBuffer));
     check_mem(buffer);
@@ -34,9 +34,11 @@ void RingBuffer_destroy(RingBuffer *buffer)
     }
 }
 
-int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
+int RingBuffer_read(RingBuffer *buffer, char *target, uint32_t amount)
 {
-    for (int index = 0; index < amount; index++)
+    check(amount <= RingBuffer_available_data(buffer), "Cannot read more than available data");
+
+    for (uint32_t index = 0; index < amount; index++)
     {
         target[index] = buffer->buffer[buffer->start];
         buffer->start = (buffer->start + 1) % buffer->capacity;
@@ -46,24 +48,32 @@ int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
     target[amount] = 0;
 
     return 0;
+
+error:
+    return -1;
 }
 
-int RingBuffer_peek(RingBuffer *buffer, char *target, int amount)
+int RingBuffer_peek(RingBuffer *buffer, char *target, uint32_t amount)
 {
-    for (int index = 0; index < amount; index++)
+    check(amount <= RingBuffer_available_data(buffer), "Cannot peek more than available data");
+
+    for (uint32_t index = 0; index < amount; index++)
     {
-        int bufferIndex = (buffer->start + index) % buffer->capacity;
+        uint32_t bufferIndex = (buffer->start + index) % buffer->capacity;
         target[index] = buffer->buffer[bufferIndex];
     }
 
     target[amount] = 0;
 
     return 0;
+
+error:
+    return -1;
 }
 
-int RingBuffer_write(RingBuffer *buffer, char *data, int length)
+int RingBuffer_write(RingBuffer *buffer, char *data, uint32_t length)
 {
-    for (int index = 0; index < length; index++)
+    for (uint32_t index = 0; index < length; index++)
     {
         if (RingBuffer_full(buffer))
         {
@@ -88,12 +98,12 @@ bool RingBuffer_full(RingBuffer *buffer)
     return buffer->count == buffer->capacity;
 }
 
-int RingBuffer_available_data(RingBuffer *buffer)
+uint32_t RingBuffer_available_data(RingBuffer *buffer)
 {
     return buffer->count;
 }
 
-int RingBuffer_available_space(RingBuffer *buffer)
+uint32_t RingBuffer_available_space(RingBuffer *buffer)
 {
     return buffer->capacity - buffer->count;
 }

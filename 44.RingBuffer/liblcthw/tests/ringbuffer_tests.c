@@ -25,6 +25,12 @@ char *test_read_write()
     mu_assert(RingBuffer_empty(buffer) == true, "RingBuffer_empty wrong return value");
     mu_assert(RingBuffer_full(buffer) == false, "RingBuffer_full wrong return value");
 
+    rc = RingBuffer_peek(buffer, "1", 1);
+    mu_assert(rc != 0, "RingBuffer_peek expected to return error code, but was successful");
+
+    rc = RingBuffer_read(buffer, "1", 1);
+    mu_assert(rc != 0, "RingBuffer_read expected to return error code, but was successful");
+
     rc = RingBuffer_write(buffer, "1234", 4);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
     mu_assert(RingBuffer_available_data(buffer) == 4, "wrong available data after Ringbuffer_write");
