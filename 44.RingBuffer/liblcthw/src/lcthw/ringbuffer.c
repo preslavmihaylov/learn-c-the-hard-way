@@ -36,7 +36,13 @@ void RingBuffer_destroy(RingBuffer *buffer)
 
 int RingBuffer_read(RingBuffer *buffer, char *target, int amount)
 {
-    memcpy(target, buffer->buffer, amount);
+    for (int index = 0; index < amount; index++)
+    {
+        target[index] = buffer->buffer[buffer->start];
+        buffer->start = (buffer->start + 1) % buffer->capacity;
+    }
+
+    buffer->count -= amount;
     target[amount] = 0;
 
     return 0;

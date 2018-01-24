@@ -33,7 +33,7 @@ char *test_read_write()
 
     rc = RingBuffer_peek(buffer, target, 4);
     mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
-    mu_assert(strcmp(target, "1234") == 0, "Bad data after read");
+    mu_assert(strcmp(target, "1234") == 0, "Bad data after peek");
 
     rc = RingBuffer_write(buffer, "5", 1);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
@@ -47,7 +47,7 @@ char *test_read_write()
     mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
 
     log_info("ASSERT Expected: %s, Actual: %s", "12345", target);
-    mu_assert(strcmp(target, "12345") == 0, "Bad data after read");
+    mu_assert(strcmp(target, "12345") == 0, "Bad data after peek");
 
     rc = RingBuffer_write(buffer, "6", 1);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
@@ -60,7 +60,7 @@ char *test_read_write()
     mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
 
     log_info("ASSERT Expected: %s, Actual: %s", "23456", target);
-    mu_assert(strcmp(target, "23456") == 0, "Bad data after read");
+    mu_assert(strcmp(target, "23456") == 0, "Bad data after peek");
 
     rc = RingBuffer_write(buffer, "789", 3);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
@@ -73,7 +73,40 @@ char *test_read_write()
     mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
 
     log_info("ASSERT Expected: %s, Actual: %s", "56789", target);
-    mu_assert(strcmp(target, "56789") == 0, "Bad data after read");
+    mu_assert(strcmp(target, "56789") == 0, "Bad data after peek");
+
+    RingBuffer_read(buffer, target, 2);
+    mu_assert(rc == 0, "RingBuffer_read bad exit status");
+    mu_assert(RingBuffer_available_data(buffer) == 3, "wrong available data after Ringbuffer_read");
+    mu_assert(RingBuffer_available_space(buffer) == 2, "wrong available space after RingBuffer_read");
+    mu_assert(RingBuffer_empty(buffer) == false, "RingBuffer_empty wrong return value");
+    mu_assert(RingBuffer_full(buffer) == false, "RingBuffer_full wrong return value");
+
+    log_info("ASSERT Expected: %s, Actual: %s", "56", target);
+    mu_assert(strcmp(target, "56") == 0, "Bad data after read");
+
+    rc = RingBuffer_write(buffer, "1", 1);
+    mu_assert(rc == 0, "RingBuffer_write bad exit status");
+    mu_assert(RingBuffer_available_data(buffer) == 4, "wrong available data after Ringbuffer_write");
+    mu_assert(RingBuffer_available_space(buffer) == 1, "wrong available space after RingBuffer_write");
+    mu_assert(RingBuffer_empty(buffer) == false, "RingBuffer_empty wrong return value");
+    mu_assert(RingBuffer_full(buffer) == false, "RingBuffer_full wrong return value");
+
+    rc = RingBuffer_peek(buffer, target, 4);
+    mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
+
+    log_info("ASSERT Expected: %s, Actual: %s", "7891", target);
+    mu_assert(strcmp(target, "7891") == 0, "Bad data after peek");
+
+    RingBuffer_read(buffer, target, 4);
+    mu_assert(rc == 0, "RingBuffer_read bad exit status");
+    mu_assert(RingBuffer_available_data(buffer) == 0, "wrong available data after Ringbuffer_read");
+    mu_assert(RingBuffer_available_space(buffer) == 5, "wrong available space after RingBuffer_read");
+    mu_assert(RingBuffer_empty(buffer) == true, "RingBuffer_empty wrong return value");
+    mu_assert(RingBuffer_full(buffer) == false, "RingBuffer_full wrong return value");
+
+    log_info("ASSERT Expected: %s, Actual: %s", "7891", target);
+    mu_assert(strcmp(target, "7891") == 0, "Bad data after read");
 
     return NULL;
 }
