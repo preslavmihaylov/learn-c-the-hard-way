@@ -22,6 +22,25 @@ char *test_read_write()
         target[i] = 1;
     }
 
+    RingBuffer *invalidBuffer = RingBuffer_create(0);
+    mu_assert(invalidBuffer == NULL, "RingBuffer_create created buffer with length 0");
+
+    rc = RingBuffer_read(NULL, target, 5);
+    mu_assert(rc != 0, "RingBuffer_read succeeded when ringbuffer is null");
+
+    rc = RingBuffer_write(NULL, "1234", 5);
+    mu_assert(rc != 0, "RingBuffer_write succeeded when ringbuffer is null");
+
+    rc = RingBuffer_peek(NULL, target, 5);
+    mu_assert(rc != 0, "RingBuffer_peek succeeded when ringbuffer is null");
+
+    mu_assert(RingBuffer_empty(NULL) == false, "RingBuffer_empty returned true with NULL");
+    mu_assert(RingBuffer_full(NULL) == false, "RingBuffer_full returned true with NULL");
+    mu_assert(
+        RingBuffer_available_data(NULL) == 0, "RingBuffer_available_data succeeded when input is NULL");
+    mu_assert(
+        RingBuffer_available_space(NULL) == 0, "RingBuffer_available_space succeeded when input is NULL");
+
     mu_assert(RingBuffer_empty(buffer) == true, "RingBuffer_empty wrong return value");
     mu_assert(RingBuffer_full(buffer) == false, "RingBuffer_full wrong return value");
 
@@ -30,6 +49,9 @@ char *test_read_write()
 
     rc = RingBuffer_read(buffer, "1", 1);
     mu_assert(rc != 0, "RingBuffer_read expected to return error code, but was successful");
+
+    rc = RingBuffer_write(buffer, "", 0);
+    mu_assert(rc != 0, "RingBuffer_write succeeded with length 0");
 
     rc = RingBuffer_write(buffer, "1234", 4);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
@@ -40,6 +62,21 @@ char *test_read_write()
     rc = RingBuffer_peek(buffer, target, 4);
     mu_assert(rc == 0, "Ringbuffer_peek bad exit status");
     mu_assert(strcmp(target, "1234") == 0, "Bad data after peek");
+
+    rc = RingBuffer_peek(buffer, NULL, 4);
+    mu_assert(rc != 0, "RingBuffer_peek succeeded when target is null");
+
+    rc = RingBuffer_read(buffer, NULL, 4);
+    mu_assert(rc != 0, "RingBuffer_read succeeded when target is null");
+
+    rc = RingBuffer_read(buffer, "", 0);
+    mu_assert(rc != 0, "RingBuffer_read succeeded when amount is 0");
+
+    rc = RingBuffer_peek(buffer, "", 0);
+    mu_assert(rc != 0, "RingBuffer_peek succeeded when amount is 0");
+
+    rc = RingBuffer_write(buffer, NULL, 4);
+    mu_assert(rc != 0, "RingBuffer_write succeeded when data is NULL");
 
     rc = RingBuffer_write(buffer, "5", 1);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");

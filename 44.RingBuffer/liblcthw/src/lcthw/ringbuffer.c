@@ -2,9 +2,6 @@
 #include <lcthw/ringbuffer.h>
 #include <lcthw/dbg.h>
 
-// TODO: NULL Checks for buffer & target in all functions
-// TODO: length > 0 checks in write/read/peek
-
 RingBuffer *RingBuffer_create(uint32_t length)
 {
     RingBuffer *buffer = NULL;
@@ -40,6 +37,9 @@ void RingBuffer_destroy(RingBuffer *buffer)
 
 int RingBuffer_read(RingBuffer *buffer, char *target, uint32_t amount)
 {
+    check(buffer != NULL, "RingBuffer cannot be NULL");
+    check(target != NULL, "Target cannot be NULL");
+    check(amount > 0, "Amount must be greater than 0");
     check(amount <= RingBuffer_available_data(buffer), "Cannot read more than available data");
 
     for (uint32_t index = 0; index < amount; index++)
@@ -59,6 +59,9 @@ error:
 
 int RingBuffer_peek(RingBuffer *buffer, char *target, uint32_t amount)
 {
+    check(buffer != NULL, "RingBuffer cannot be NULL");
+    check(target != NULL, "Target cannot be NULL");
+    check(amount > 0, "Amount must be greater than 0");
     check(amount <= RingBuffer_available_data(buffer), "Cannot peek more than available data");
 
     for (uint32_t index = 0; index < amount; index++)
@@ -77,6 +80,10 @@ error:
 
 int RingBuffer_write(RingBuffer *buffer, char *data, uint32_t length)
 {
+    check(buffer != NULL, "RingBuffer cannot be NULL");
+    check(data != NULL, "Data cannot be NULL");
+    check(length > 0, "Length must be greater than 0");
+
     for (uint32_t index = 0; index < length; index++)
     {
         if (RingBuffer_full(buffer))
@@ -90,25 +97,48 @@ int RingBuffer_write(RingBuffer *buffer, char *data, uint32_t length)
     }
 
     return 0;
+
+error:
+    return -1;
 }
 
 bool RingBuffer_empty(RingBuffer *buffer)
 {
+    check(buffer != NULL, "Buffer cannot be NULL");
+
     return buffer->count == 0;
+
+error:
+    return false;
 }
 
 bool RingBuffer_full(RingBuffer *buffer)
 {
+    check(buffer != NULL, "Buffer cannot be NULL");
+
     return buffer->count == buffer->capacity;
+
+error:
+    return false;
 }
 
 uint32_t RingBuffer_available_data(RingBuffer *buffer)
 {
+    check(buffer != NULL, "Buffer cannot be NULL");
+
     return buffer->count;
+
+error:
+    return 0;
 }
 
 uint32_t RingBuffer_available_space(RingBuffer *buffer)
 {
+    check(buffer != NULL, "Buffer cannot be NULL");
+
     return buffer->capacity - buffer->count;
+
+error:
+    return 0;
 }
 

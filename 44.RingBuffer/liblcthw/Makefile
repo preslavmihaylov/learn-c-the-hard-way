@@ -24,6 +24,8 @@ all: target tests
 
 target: build $(SLIB_TARGET) $(DLIB_TARGET)
 
+rebuild: clean all
+
 $(SLIB_TARGET): CFLAGS += -fPIC
 $(SLIB_TARGET): $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
