@@ -1,9 +1,14 @@
 #include <lcthw/dbg.h>
+#include <lcthw/ringbuffer.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#define STDIN_FD 0
 
 int nonblock(int fd)
 {
@@ -44,12 +49,41 @@ error:
     return -1;
 }
 
+int read_some(RingBuffer *inputRB, int fd, bool isSocket)
+{
+    // TODO
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
+    fd_set allreads;
+    fd_set readmask;
+    int rc;
+
     check(argc == 3, "USAGE: netclient <host> <port>");
 
-    int fd = client_connect(argv[1], argv[2]);
-    (void)fd;
+    int conn = client_connect(argv[1], argv[2]);
+
+    RingBuffer *stdinRB = RingBuffer_create(1024 * 10);
+
+    FD_ZERO(&allreads);
+    FD_SET(conn, &allreads);
+    FD_SET(STDIN_FD, &allreads);
+
+    while (true)
+    {
+        readmask = allreads;
+
+        //rc = select(socket + 1, &readmask, NULL, NULL, NULL);
+        check(rc >= 0, "select failed");
+
+        if (FD_ISSET(STDIN_FD, &readmask))
+        {
+            rc = read_some(stdinRB, 0, false);
+            check_debug(rc != -1, "Failed to read from stdin");
+        }
+    }
 
     return 0;
 

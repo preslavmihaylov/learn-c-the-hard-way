@@ -19,7 +19,7 @@ TEST_SOURCES=$(wildcard $(TESTS_DIR)/*_tests.c)
 TESTS=$(patsubst %.c, %.tst,$(TEST_SOURCES))
 
 PROGRAMS_SRC=$(wildcard $(BIN_DIR)/*.c)
-PROGRAMS=$(patsubst %.c, %, $(PROGRAMS_SRC))
+PROGRAMS=$(patsubst %.c, %.exe, $(PROGRAMS_SRC))
 
 SLIB_TARGET=$(BUILD_DIR)/liblcthw.a
 DLIB_TARGET=$(patsubst %.a,%.so,$(SLIB_TARGET))
@@ -40,6 +40,9 @@ $(DLIB_TARGET): $(OBJECTS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
+
+$(BIN_DIR)/%.exe: $(BIN_DIR)/%.c
+	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@
 
 $(TESTS_DIR)/%.tst: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@ $(LIBS)
