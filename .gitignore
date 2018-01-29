@@ -3,6 +3,7 @@
 *.o
 *.swp
 *.tst
+*.exe
 tags
 .includes
 tests.log
