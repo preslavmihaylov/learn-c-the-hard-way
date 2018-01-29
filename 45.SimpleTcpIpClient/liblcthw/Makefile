@@ -6,8 +6,8 @@ TESTS_DIR=./tests
 
 CC=gcc
 INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR)
-CFLAGS=-g -std=c99 -O2 -Wall -Wextra -Werror -Wno-unused-function \
-		  -Wno-unused-parameter -Wno-address -rdynamic -DNDEBUG -Du_char="unsigned char"\
+CFLAGS=-g -std=gnu99 -O2 -Wall -Wextra -Werror -Wno-unused-function \
+		  -Wno-unused-parameter -Wno-address -rdynamic -DNDEBUG\
 		  $(INCLUDES) $(OPTFLAGS)
 
 LIBS=-ldl -lm -lbsd $(OPTLIBS)
@@ -19,7 +19,7 @@ TEST_SOURCES=$(wildcard $(TESTS_DIR)/*_tests.c)
 TESTS=$(patsubst %.c, %.tst,$(TEST_SOURCES))
 
 PROGRAMS_SRC=$(wildcard $(BIN_DIR)/*.c)
-PROGRAMS=$(patsubst %.c, %.exe, $(PROGRAMS_SRC))
+PROGRAMS=$(patsubst %.c, %, $(PROGRAMS_SRC))
 
 SLIB_TARGET=$(BUILD_DIR)/liblcthw.a
 DLIB_TARGET=$(patsubst %.a,%.so,$(SLIB_TARGET))
