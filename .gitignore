@@ -7,3 +7,4 @@
 tags
 .includes
 tests.log
+compile_commands.json
