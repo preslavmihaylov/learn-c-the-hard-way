@@ -47,7 +47,7 @@ int RingBuffer_read(RingBuffer *buffer, char *target, uint32_t amount)
         target[index] = buffer->buffer[buffer->start];
         buffer->start = (buffer->start + 1) % buffer->capacity;
     }
-
+    
     buffer->count -= amount;
     target[amount] = 0;
 

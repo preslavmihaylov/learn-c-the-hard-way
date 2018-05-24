@@ -25,4 +25,6 @@ bool RingBuffer_full(RingBuffer *buffer);
 uint32_t RingBuffer_available_data(RingBuffer *buffer);
 uint32_t RingBuffer_available_space(RingBuffer *buffer);
 
+#define RINGBUFFER_START(rb) (&rb->buffer[RingBuffer_available_data(rb)])
+
 #endif // LCTHW_RINGBUFFER_H

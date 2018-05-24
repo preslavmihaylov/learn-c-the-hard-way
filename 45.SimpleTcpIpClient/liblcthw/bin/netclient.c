@@ -51,15 +51,30 @@ error:
 
 int read_some(RingBuffer *inputRB, int fd, bool isSocket)
 {
-    // TODO
-    return 0;
+    int rc = 0;
+    char input[RingBuffer_available_space(inputRB)];
+   
+    // TODO: Socket read
+    rc = read(fd, input, RingBuffer_available_space(inputRB));
+    check(rc >= 0, "Couldn't read anything"); 
+    RingBuffer_write(inputRB, input, rc);
+
+    //input[RingBuffer_available_data(inputRB)] = 0;
+    //rc = RingBuffer_read(inputRB, input, RingBuffer_available_data(inputRB));
+    //check(rc == 0, "RingBuffer_read failed\n");
+    //printf("%s", input);
+
+    return rc;
+
+error: 
+    return -1;
 }
 
 int main(int argc, char *argv[])
 {
     fd_set allreads;
     fd_set readmask;
-    int rc;
+    int rc = 0;
 
     check(argc == 3, "USAGE: netclient <host> <port>");
 
