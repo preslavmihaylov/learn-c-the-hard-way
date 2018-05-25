@@ -82,7 +82,6 @@ int RingBuffer_write(RingBuffer *buffer, char *data, uint32_t length)
 {
     check(buffer != NULL, "RingBuffer cannot be NULL");
     check(data != NULL, "Data cannot be NULL");
-    check(length > 0, "Length must be greater than 0");
 
     for (uint32_t index = 0; index < length; index++)
     {

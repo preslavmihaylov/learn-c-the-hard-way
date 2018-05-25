@@ -50,9 +50,6 @@ char *test_read_write()
     rc = RingBuffer_read(buffer, "1", 1);
     mu_assert(rc != 0, "RingBuffer_read expected to return error code, but was successful");
 
-    rc = RingBuffer_write(buffer, "", 0);
-    mu_assert(rc != 0, "RingBuffer_write succeeded with length 0");
-
     rc = RingBuffer_write(buffer, "1234", 4);
     mu_assert(rc == 0, "RingBuffer_write bad exit status");
     mu_assert(RingBuffer_available_data(buffer) == 4, "wrong available data after Ringbuffer_write");
