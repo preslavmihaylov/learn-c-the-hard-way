@@ -8,3 +8,4 @@ tags
 .includes
 tests.log
 compile_commands.json
+.syntastic_c_config
