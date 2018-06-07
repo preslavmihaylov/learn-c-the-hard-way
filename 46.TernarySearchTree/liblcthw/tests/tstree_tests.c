@@ -283,6 +283,61 @@ char *test_search_exact()
 
 char *test_search_prefix()
 {
+    {
+        char *res = TSTree_search_prefix(NULL, "aaa", 3);
+        mu_assert(res == NULL, "expected NULL when tree is NULL");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "aaa", 3, "aaa");
+        char *res = TSTree_search_prefix(tree, NULL, 3);
+        mu_assert(res == NULL, "expected NULL when key is NULL");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "aaa", 3, "aaa");
+        char *res = TSTree_search_prefix(tree, "aaa", 0);
+        mu_assert(res == NULL, "expected NULL when length is 0");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "a", 1, "a");
+        char *res = TSTree_search_prefix(tree, "a", 1);
+        mu_assert(strcmp(res, "a") == 0, "expected 'a' on search_prefix");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "aa", 2, "aa");
+        char *res = TSTree_search_prefix(tree, "aa", 2);
+        mu_assert(strcmp(res, "aa") == 0, "expected 'aa' on search_prefix");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "aaa", 3, "aaa");
+        char *res = TSTree_search_prefix(tree, "aaa", 3);
+        mu_assert(strcmp(res, "aaa") == 0, "expected 'aaa' on search_prefix");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "aaa", 3, "aaa");
+        char *res = TSTree_search_prefix(tree, "aa", 2);
+        mu_assert(strcmp(res, "aaa") == 0, "expected 'aaa' on search_prefix with 'aa'");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "baa", 3, "baa");
+        tree = TSTree_insert(tree, "aaa", 3, "aaa");
+        char *res = TSTree_search_prefix(tree, "aa", 2);
+        mu_assert(strcmp(res, "aaa") == 0, "expected 'aaa' on search_prefix with 'aa' (left branch)");
+    }
+
+    {
+        TSTree *tree = TSTree_insert(NULL, "baa", 3, "baa");
+        tree = TSTree_insert(tree, "caa", 3, "caa");
+        char *res = TSTree_search_prefix(tree, "ca", 2);
+        mu_assert(strcmp(res, "caa") == 0, "expected 'caa' on search_prefix with 'ca' (right branch)");
+    }
+
     return NULL;
 }
 

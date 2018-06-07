@@ -12,14 +12,14 @@ typedef struct TSTree {
     void *value;
 } TSTree;
 
-TSTree *TSTree_insert(TSTree *root, const char *key, size_t len, void *value);
+TSTree *TSTree_insert(TSTree *node, const char *key, size_t len, void *value);
 
-void *TSTree_search(TSTree *root, const char *key, size_t len);
-void *TSTree_search_prefix(TSTree *root, const char *key, size_t len);
+void *TSTree_search(TSTree *node, const char *key, size_t len);
+void *TSTree_search_prefix(TSTree *node, const char *key, size_t len);
 
 typedef void (*TSTree_traverse_cb)(void *value, void *data);
-void TSTree_traverse(TSTree *root, TSTree_traverse_cb cb, void *data);
+void TSTree_traverse(TSTree *node, TSTree_traverse_cb cb, void *data);
 
-void TSTree_destroy(TSTree *root);
+void TSTree_destroy(TSTree *node);
 
 #endif
