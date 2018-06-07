@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include <lcthw/tstree.h>
+#include <assert.h>
 
 TSTree *build_tree()
 {
@@ -341,13 +342,85 @@ char *test_search_prefix()
     return NULL;
 }
 
+static void *mockData = "aaa";
+static int traverse_cnt = 0;
+
+void mock_traverse(void *value, void *data)
+{
+    assert(value != NULL && "value should not be NULL");
+    assert(data == mockData && "data should be mockData");
+    traverse_cnt++; 
+}
+
 char *test_traverse()
 {
+    {
+        traverse_cnt = 0;
+        TSTree_traverse(NULL, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 0, "shouldn't traverse when tree is NULL");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "a", 1, "a");
+        TSTree_traverse(tree, NULL, mockData);
+        mu_assert(traverse_cnt == 0, "shouldn't traverse when traverse_cb is NULL");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "a", 1, "a");
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 1, "expected to traverse 'a'");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "aa", 2, "aa");
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 1, "expected to traverse 'aa'");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "aa", 2, "aa");
+        tree = TSTree_insert(tree, "aaa", 3, "aaa");
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 2, "expected to traverse 'aa' and 'aaa'");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "ba", 2, "ba");
+        tree = TSTree_insert(tree, "aaa", 3, "aaa");
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 2, "expected to traverse 'ba' and 'aaa'");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = TSTree_insert(NULL, "ba", 2, "ba");
+        tree = TSTree_insert(tree, "caa", 3, "caa");
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 2, "expected to traverse 'ba' and 'caa'");
+    }
+
+    {
+        traverse_cnt = 0;
+        TSTree *tree = build_tree();
+        TSTree_traverse(tree, mock_traverse, mockData);
+        mu_assert(traverse_cnt == 9, "expected to traverse "
+                        "'a', 'ab', 'abc', 'b', 'bb', 'bbc', 'c', 'cb', 'cbc'");
+    }
+
     return NULL;
 }
 
 char *test_destroy()
 {
+    TSTree *tree = build_tree();
+    TSTree_destroy(tree);
+
     return NULL; 
 }
 

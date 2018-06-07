@@ -100,8 +100,49 @@ error:
 
 void TSTree_traverse(TSTree *node, TSTree_traverse_cb cb, void *data)
 {
+    check(node != NULL, "Node cannot be NULL");
+    check(cb != NULL, "callback cannot be NULL");
+
+    if (node->left)
+    {
+        TSTree_traverse(node->left, cb, data);
+    }
+    
+    if (node->right)
+    {
+        TSTree_traverse(node->right, cb, data);
+    }
+
+    if (node->equal)
+    {
+        TSTree_traverse(node->equal, cb, data);
+    }
+
+    if (node->value)
+    {
+        cb(node->value, data);
+    }
+
+error: // fallthrough
+    return;
 }
 
 void TSTree_destroy(TSTree *node)
 {
+    if (node->left)
+    {
+        TSTree_destroy(node->left);
+    }
+
+    if (node->right)
+    {
+        TSTree_destroy(node->right);
+    }
+
+    if (node->equal)
+    {
+        TSTree_destroy(node->equal);
+    }
+
+    free(node);
 }
