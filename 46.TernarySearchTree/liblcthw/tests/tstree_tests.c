@@ -1,6 +1,35 @@
 #include "minunit.h"
 #include <lcthw/tstree.h>
 
+TSTree *build_tree()
+{
+    static char *str1 = "bbc";
+    static char *str2 = "bb";
+    static char *str3 = "b";
+
+    static char *lstr1 = "abc";
+    static char *lstr2 = "ab";
+    static char *lstr3 = "a";
+
+    static char *rstr1 = "cbc";
+    static char *rstr2 = "cb";
+    static char *rstr3 = "c";
+
+    TSTree *res = TSTree_insert(NULL, str1, strlen(str1), str1);
+    res = TSTree_insert(res, str2, strlen(str2), str2);
+    res = TSTree_insert(res, str3, strlen(str3), str3);
+
+    res = TSTree_insert(res, lstr1, strlen(lstr1), lstr1);
+    res = TSTree_insert(res, lstr2, strlen(lstr2), lstr2);
+    res = TSTree_insert(res, lstr3, strlen(lstr3), lstr3);
+
+    res = TSTree_insert(res, rstr1, strlen(rstr1), rstr1);
+    res = TSTree_insert(res, rstr2, strlen(rstr2), rstr2);
+    res = TSTree_insert(res, rstr3, strlen(rstr3), rstr3);
+
+    return res;
+}
+
 char *test_insert()
 {
     {
@@ -167,6 +196,88 @@ char *test_insert()
 
 char *test_search_exact()
 {
+    TSTree *tree = build_tree();
+    {
+        char *res = TSTree_search(NULL, "aaa", 3);
+        mu_assert(res == NULL, "expected NULL when node was NULL");
+    }
+
+    {
+        char *res = TSTree_search(tree, NULL, 3);
+        mu_assert(res == NULL, "expected NULL when key was NULL");
+    }
+
+    {
+        char *res = TSTree_search(tree, "aaa", 0);
+        mu_assert(res == NULL, "expected NULL when length was 0");
+    }
+
+    {
+        char *res = TSTree_search(tree, "b", 1);
+        mu_assert(strcmp(res, "b") == 0, "failed to find 'b'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "a", 1);
+        mu_assert(strcmp(res, "a") == 0, "failed to find 'a'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "c", 1);
+        mu_assert(strcmp(res, "c") == 0, "failed to find 'c'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "bb", 2);
+        mu_assert(strcmp(res, "bb") == 0, "failed to find 'bb'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "bbc", 3);
+        mu_assert(strcmp(res, "bbc") == 0, "failed to find 'bbc'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "ab", 2);
+        mu_assert(strcmp(res, "ab") == 0, "failed to find 'ab'");
+    }
+    
+    {
+        char *res = TSTree_search(tree, "abc", 3);
+        mu_assert(strcmp(res, "abc") == 0, "failed to find 'abc'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "cb", 2);
+        mu_assert(strcmp(res, "cb") == 0, "failed to find 'cb'");
+    }
+
+
+    {
+        char *res = TSTree_search(tree, "cbc", 3);
+        mu_assert(strcmp(res, "cbc") == 0, "failed to find 'cbc'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "aaa", 3);
+        mu_assert(res == NULL, "unexpectedly found 'aaa'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "aba", 3);
+        mu_assert(res == NULL, "unexpectedly found 'aba'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "abb", 3);
+        mu_assert(res == NULL, "unexpectedly found 'abb'");
+    }
+
+    {
+        char *res = TSTree_search(tree, "bba", 3);
+        mu_assert(res == NULL, "unexpectedly found 'bba'");
+    }
+
     return NULL;
 }
 

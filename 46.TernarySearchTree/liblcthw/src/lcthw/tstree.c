@@ -48,6 +48,30 @@ error:
 
 void *TSTree_search(TSTree *root, const char *key, size_t len)
 {
+    check(root != NULL, "node cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+    check(len > 0, "length must be positive");
+
+    TSTree *node = root;
+    (void)node;
+
+    if (*key < node->splitchar)
+    {
+        return TSTree_search(root->left, key, len);
+    }
+    else if (*key > node->splitchar)
+    {
+        return TSTree_search(root->right, key, len);
+    }
+    else
+    {
+        if (len > 1)
+            return TSTree_search(root->equal, key+1, len-1);
+
+        return node->value;
+    }
+
+error: // fallthrough
     return NULL;
 }
 
