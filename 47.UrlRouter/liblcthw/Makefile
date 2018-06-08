@@ -24,9 +24,11 @@ PROGRAMS=$(patsubst %.c, %.exe, $(PROGRAMS_SRC))
 SLIB_TARGET=$(BUILD_DIR)/liblcthw.a
 DLIB_TARGET=$(patsubst %.a,%.so,$(SLIB_TARGET))
 
-all: target tests $(PROGRAMS)
+all: target tests bin
 
 target: build $(SLIB_TARGET) $(DLIB_TARGET)
+
+bin: $(PROGRAMS)
 
 rebuild: clean all
 
