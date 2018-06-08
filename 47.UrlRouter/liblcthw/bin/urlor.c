@@ -90,15 +90,35 @@ error:
     return NULL;
 }
 
+bstring match_url(TSTree *routes, char *term)
+{
+    bstring res = (bstring)TSTree_search(routes, term, strlen(term));
+    if (res == NULL)
+    {
+        printf("No exact match found. Trying prefix.\n");
+        res = (bstring)TSTree_search_prefix(routes, term, strlen(term));
+    }
+
+    return res;
+}
+
 void run_urlor(TSTree *routes)
 {
     char *line;
-
     while((line = read_line("URL> ")) != NULL)
     {
-        check(strcmp(line, "quit") == 0, "program quit by user");
+        check(strcmp(line, "quit") != 0, "program quit by user");
 
-        printf("%s\n", line);
+        bstring res = match_url(routes, line);
+        if (res != NULL)
+        {
+            printf("MATCH: %s\n", bdata(res));
+        }
+        else
+        {
+            printf("FAIL: couldn't match %s\n", line);
+        }
+
         bcstrfree(line);
     }
 

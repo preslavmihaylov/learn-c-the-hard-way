@@ -7,7 +7,7 @@ static TSTree *TSTree_insert_base(TSTree *node, const char *key, size_t len, voi
         node = calloc(1, sizeof(TSTree));
         node->splitchar = *key;
     }
-    
+
     if (*key < node->splitchar)
     {
         node->left = TSTree_insert_base(node->left, key, len, value);
@@ -38,16 +38,17 @@ TSTree *TSTree_insert(TSTree *node, const char *key, size_t len, void *value)
     check(len > 0, "Length must be positive");
 
     return TSTree_insert_base(node, key, len, value);
-   
+
 error:
     return NULL;
 }
 
 void *TSTree_search(TSTree *node, const char *key, size_t len)
 {
-    check(node != NULL, "node cannot be NULL");
     check(key != NULL, "key cannot be NULL");
     check(len > 0, "length must be positive");
+
+    if (node == NULL) return NULL;
 
     if (*key < node->splitchar)
     {
@@ -70,10 +71,11 @@ error: // fallthrough
 
 void *TSTree_search_prefix(TSTree *node, const char *key, size_t len)
 {
-    check(node != NULL, "node cannot be NULL");
     check(key != NULL, "Key cannot be NULL");
     check(len > 0, "Length must be positive");
-    
+
+    if (node == NULL) return NULL;
+
     if (*key < node->splitchar)
     {
         return TSTree_search_prefix(node->left, key, len);
@@ -86,7 +88,7 @@ void *TSTree_search_prefix(TSTree *node, const char *key, size_t len)
     {
         return TSTree_search_prefix(node->equal, key+1, len-1);
     }
-    
+
     while (node && node->value == NULL)
     {
         node = node->equal;
@@ -107,7 +109,7 @@ void TSTree_traverse(TSTree *node, TSTree_traverse_cb cb, void *data)
     {
         TSTree_traverse(node->left, cb, data);
     }
-    
+
     if (node->right)
     {
         TSTree_traverse(node->right, cb, data);
