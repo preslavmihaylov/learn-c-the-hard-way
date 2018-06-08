@@ -2,6 +2,30 @@
 #include <unistd.h>
 #include <dbg.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <sys/wait.h>
+
+void handle_sigchild(int sig)
+{
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+int setup_sig()
+{
+    struct sigaction sa = {
+        .sa_handler = handle_sigchild,
+        .sa_flags = SA_RESTART | SA_NOCLDSTOP
+    };
+
+    sigemptyset(&sa.sa_mask);
+    int rc = sigaction(SIGCHLD, &sa, 0);
+    check(rc == 0, "Failed to setup signal");
+
+    return 0;
+
+error:
+    return -1;
+}
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +34,9 @@ int main(int argc, char *argv[])
     int server_fd;
 
     check(argc == 2, "Usage: %s <port>", argv[0]);
+
+    rc = setup_sig();
+    check(rc == 0, "failed to setup signal");
 
     server_fd = run_server(atoi(argv[1]));
     while (true)
@@ -47,3 +74,4 @@ int main(int argc, char *argv[])
 error:
     return -1;
 }
+
