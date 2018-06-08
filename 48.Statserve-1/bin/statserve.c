@@ -5,18 +5,30 @@
 
 int main(int argc, char *argv[])
 {
+    char str[100];
+    int rc;
+    int server_fd;
+
     check(argc == 2, "Usage: %s <port>", argv[0]);
 
-    char str[100];
-    server_fds serv = run_server(atoi(argv[1]));
-
+    server_fd = run_server(atoi(argv[1]));
     while (true)
     {
-        bzero(str, 100);
-        read(serv.client_fd, str, 100);
+        // get client comms fd from server
+        int client_fd = accept(server_fd, (struct sockaddr *)NULL, NULL);
+        printf("connection accepted from client\n");
 
-        printf("Echoing back - %s", str);
-        write(serv.client_fd, str, strlen(str)+1);
+        while (true)
+        {
+            bzero(str, 100);
+            rc = read(client_fd, str, 100);
+            if (rc <= 0) break;
+
+            printf("Echoing back - %s", str);
+            write(client_fd, str, strlen(str)+1);
+        }
+
+        printf("connection with client closed\n");
     }
 
     return 0;

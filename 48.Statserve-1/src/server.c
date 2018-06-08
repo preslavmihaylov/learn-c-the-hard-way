@@ -1,9 +1,8 @@
 #include <server.h>
 
-server_fds run_server(int port)
+int run_server(int port)
 {
     int server_fd;
-    int client_fd;
     struct sockaddr_in servaddr;
 
     // create socket for AF_INET (IPv4 comms)
@@ -25,9 +24,5 @@ server_fds run_server(int port)
 
     printf("Server listening on port %d\n", port);
 
-    // get client comms fd from server
-    client_fd = accept(server_fd, (struct sockaddr *)NULL, NULL);
-
-    server_fds serv = { .server_fd = server_fd, .client_fd = client_fd };
-    return serv;
+    return server_fd;
 }
