@@ -1,13 +1,12 @@
 SRC_DIR=./src
-LCTHW_DIR=$(SRC_DIR)/lcthw
 BUILD_DIR=./build
 BIN_DIR=./bin
 TESTS_DIR=./tests
 
 CC=gcc
-INCLUDES=-I$(SRC_DIR) -I$(LCTHW_DIR)
+INCLUDES=-I$(SRC_DIR)
 CFLAGS=-g -std=gnu99 -O2 -Wall -Wextra -Werror -Wno-unused-function \
-		  -Wno-unused-parameter -Wno-address -rdynamic -DNDEBUG\
+		  -Wno-unused-parameter -Wno-address -Wno-unused-result -rdynamic -DNDEBUG\
 		  $(INCLUDES) $(OPTFLAGS)
 
 LIBS=-ldl -lm -lbsd $(OPTLIBS)
