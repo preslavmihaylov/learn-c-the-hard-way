@@ -18,17 +18,28 @@ int main(int argc, char *argv[])
         int client_fd = accept(server_fd, (struct sockaddr *)NULL, NULL);
         printf("connection accepted from client\n");
 
-        while (true)
+        int child_rc = fork();
+        if (child_rc == 0)
         {
-            bzero(str, 100);
-            rc = read(client_fd, str, 100);
-            if (rc <= 0) break;
+            // child process here
+            while (true)
+            {
+                bzero(str, 100);
+                rc = read(client_fd, str, 100);
+                if (rc <= 0) break;
 
-            printf("Echoing back - %s", str);
-            write(client_fd, str, strlen(str)+1);
+                printf("Echoing back - %s", str);
+                write(client_fd, str, strlen(str)+1);
+            }
+
+            printf("connection with client closed\n");
+            exit(0);
         }
-
-        printf("connection with client closed\n");
+        else
+        {
+            // server process here
+            close(client_fd);
+        }
     }
 
     return 0;
