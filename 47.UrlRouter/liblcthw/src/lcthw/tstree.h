@@ -14,8 +14,8 @@ typedef struct TSTree {
 
 TSTree *TSTree_insert(TSTree *node, const char *key, size_t len, void *value);
 
-void *TSTree_search(TSTree *node, const char *key, size_t len);
-void *TSTree_search_prefix(TSTree *node, const char *key, size_t len);
+void *TSTree_search(const TSTree *node, const char *key, size_t len);
+void *TSTree_search_prefix(const TSTree *node, const char *key, size_t len);
 
 typedef void (*TSTree_traverse_cb)(void *value, void *data);
 void TSTree_traverse(TSTree *node, TSTree_traverse_cb cb, void *data);

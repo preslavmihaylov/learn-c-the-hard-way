@@ -43,7 +43,7 @@ error:
     return NULL;
 }
 
-void *TSTree_search(TSTree *node, const char *key, size_t len)
+void *TSTree_search(const TSTree *node, const char *key, size_t len)
 {
     check(key != NULL, "key cannot be NULL");
     check(len > 0, "length must be positive");
@@ -69,7 +69,7 @@ error: // fallthrough
     return NULL;
 }
 
-void *TSTree_search_prefix(TSTree *node, const char *key, size_t len)
+void *TSTree_search_prefix(const TSTree *node, const char *key, size_t len)
 {
     check(key != NULL, "Key cannot be NULL");
     check(len > 0, "Length must be positive");
@@ -148,3 +148,4 @@ void TSTree_destroy(TSTree *node)
 
     free(node);
 }
+

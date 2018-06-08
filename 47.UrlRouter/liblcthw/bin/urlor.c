@@ -22,8 +22,6 @@ TSTree * add_route_data(TSTree *routes, bstring line)
 
     bstring route = tokens->entry[0];
     bstring handler = tokens->entry[1];
-    (void)route;
-    (void)handler;
 
     routes = TSTree_insert(routes, bdata(route), blength(route), bstrcpy(handler));
     check(routes != NULL, "Failed to insert in TSTree");
@@ -72,31 +70,29 @@ error:
     return NULL;
 }
 
-char *read_line(char *prompt)
+bstring read_line(char *prompt)
 {
     printf("%s", prompt);
-    bstring bline = bgets((bNgetc)fgetc, stdin, '\n');
-    check(bline != NULL, "failed to read line from stdin");
+    bstring line = bgets((bNgetc)fgetc, stdin, '\n');
+    check(line != NULL, "failed to read line from stdin");
 
-    int rc = btrimws(bline);
-    check(rc == BSTR_OK, "failed to trim bstring");
-
-    char *line = bstr2cstr(bline, 0);
-    bdestroy(bline);
+    check(btrimws(line) == BSTR_OK, "failed to trim bstring");
 
     return line;
 
 error:
+    if (line) bdestroy(line);
+
     return NULL;
 }
 
-bstring match_url(TSTree *routes, char *term)
+bstring match_url(const TSTree *routes, bstring term)
 {
-    bstring res = (bstring)TSTree_search(routes, term, strlen(term));
+    bstring res = (bstring)TSTree_search(routes, bdata(term), blength(term));
     if (res == NULL)
     {
         printf("No exact match found. Trying prefix.\n");
-        res = (bstring)TSTree_search_prefix(routes, term, strlen(term));
+        res = (bstring)TSTree_search_prefix(routes, bdata(term), blength(term));
     }
 
     return res;
@@ -104,33 +100,42 @@ bstring match_url(TSTree *routes, char *term)
 
 void run_urlor(TSTree *routes)
 {
-    char *line;
+    bstring res = NULL;
+    bstring line = NULL;
+
     while((line = read_line("URL> ")) != NULL)
     {
-        check(strcmp(line, "quit") != 0, "program quit by user");
+        char *cstrline = bdata(line);
+        check(strcmp(cstrline, "quit") != 0, "program quit by user");
 
-        bstring res = match_url(routes, line);
+        res = match_url(routes, line);
         if (res != NULL)
         {
             printf("MATCH: %s\n", bdata(res));
         }
         else
         {
-            printf("FAIL: couldn't match %s\n", line);
+            printf("FAIL: couldn't match %s\n", bdata(line));
         }
 
-        bcstrfree(line);
+        bdestroy(line);
     }
 
 error:
-    if (line) bcstrfree(line);
+    if (line) bdestroy(line);
 }
 
 int main(int argc, char *argv[])
 {
-    TSTree *routes = load_routes("temp.txt");
+    check(argc == 2, "Usage: %s <urlfile>", argv[0]);
 
+    TSTree *routes = load_routes(argv[1]);
     run_urlor(routes);
     destroy_routes(routes);
+
+    return 0;
+
+error:
+    return -1;
 }
 
