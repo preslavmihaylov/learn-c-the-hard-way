@@ -68,7 +68,7 @@ $(BIN_DIR)/%.exe: $(BIN_DIR)/%.c
 	$(CC) $(CFLAGS) $< $(SLIB_TARGET) $(LIBLCTHW) -o $@
 
 $(TESTS_DIR)/%.tst: $(TESTS_DIR)/%.c
-	$(CC) $(CFLAGS) $< $(SLIB_TARGET) -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $< $(SLIB_TARGET) $(LIBLCTHW) -o $@ $(LIBS)
 
 ###############
 #### SETUP ####
