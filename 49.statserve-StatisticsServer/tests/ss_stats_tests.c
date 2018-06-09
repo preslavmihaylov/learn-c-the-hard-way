@@ -44,7 +44,6 @@ char *test_sample()
     int rc;
     SS_Stats *stats = ss_stats_create();
     bstring str = bfromcstr("sample");
-    (void)stats;
 
     {
         rc = ss_stats_sample(NULL, str, 10);
@@ -82,9 +81,14 @@ char *test_sample()
 
 char *test_mean()
 {
+    double mean = 0;
     SS_Stats *stats = ss_stats_create();
+    bstring str = bfromcstr("sample");
+    (void)stats;
+
     {
-        ss_stats_add(stats, bfromcstr("sample"));
+        mean = ss_stats_mean(NULL, str);
+
     }
 
     return NULL;
@@ -134,6 +138,44 @@ char *test_dump()
     return NULL;
 }
 
+char *test_delete()
+{
+    int rc;
+    SS_Stats *stats = ss_stats_create();
+    bstring str = bfromcstr("sample");
+
+    {
+        rc = ss_stats_delete(NULL, str);
+        mu_assert(rc != 0, "expected ss_stats_delete to fail when stats are NULL");
+    }
+
+    {
+        rc = ss_stats_delete(stats, NULL);
+        mu_assert(rc != 0, "expected ss_stats_delete to fail when key is NULL");
+    }
+
+    {
+        rc = ss_stats_delete(stats, str);
+        mu_assert(rc != 0, "expected ss_stats_delete to fail when key is not added");
+    }
+
+    {
+        rc = ss_stats_add(stats, str);
+        mu_assert(rc == 0, "ss_stats_add unexpectedly failed");
+
+        Stats *dumpedStats = ss_stats_dump(stats, str);
+        mu_assert(dumpedStats != NULL, "dumped stats after add are unexpectedly NULL");
+
+        rc = ss_stats_delete(stats, str);
+        mu_assert(rc == 0, "ss_stats_delete unexpectedly failed");
+
+        dumpedStats = ss_stats_dump(stats, str);
+        mu_assert(dumpedStats == NULL, "dumped stats after delete are unexpectedly not NULL");
+    }
+
+    return NULL;
+}
+
 char *all_tests()
 {
     mu_suite_start();
@@ -143,6 +185,7 @@ char *all_tests()
     mu_run_test(test_sample);
     mu_run_test(test_mean);
     mu_run_test(test_dump);
+    mu_run_test(test_delete);
 
     return NULL;
 }

@@ -33,7 +33,7 @@ error:
 
 double ss_stats_mean(SS_Stats *stats, bstring key)
 {
-    return 0;
+    return 1;
 }
 
 Stats *ss_stats_dump(SS_Stats *stats, bstring key)
@@ -48,8 +48,19 @@ error:
     return NULL;
 }
 
-void ss_stats_delete(SS_Stats *stats, bstring key)
+int ss_stats_delete(SS_Stats *stats, bstring key)
 {
+    check(stats != NULL, "stats cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+    check(Hashmap_get(stats->data, key) != NULL, "key does not exist");
+
+    void *data = Hashmap_delete(stats->data, key);
+    check(data != NULL, "Hashmap failed to delete data");
+
+    return 0;
+
+error:
+    return -1;
 }
 
 int ss_stats_sample(SS_Stats *stats, bstring key, double sample)
