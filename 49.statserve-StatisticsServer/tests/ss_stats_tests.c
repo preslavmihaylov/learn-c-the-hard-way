@@ -81,14 +81,51 @@ char *test_sample()
 
 char *test_mean()
 {
+    int rc;
     double mean = 0;
     SS_Stats *stats = ss_stats_create();
     bstring str = bfromcstr("sample");
     (void)stats;
 
     {
-        mean = ss_stats_mean(NULL, str);
+        rc = ss_stats_mean(NULL, str, &mean);
+        mu_assert(rc != 0, "ss_stats_mean should not pass when stats is NULL");
+    }
 
+    {
+        rc = ss_stats_mean(stats, NULL, &mean);
+        mu_assert(rc != 0, "ss_stats_mean should not pass when key is NULL");
+    }
+
+    {
+        rc = ss_stats_mean(stats, str, &mean);
+        mu_assert(rc != 0, "ss_stats_mean should not pass when key does not exist in stats");
+    }
+
+    {
+        rc = ss_stats_add(stats, str);
+        mu_assert(rc == 0, "ss_stats_add unexpectedly failed");
+
+        rc = ss_stats_mean(stats, str, &mean);
+        mu_assert(rc != 0, "ss_stats_mean of 0 elements is expected to be invalid");
+
+        rc = ss_stats_sample(stats, str, 10);
+        mu_assert(rc == 0, "ss_stats_sample unexpectedly failed");
+
+        rc = ss_stats_mean(stats, str, &mean);
+        mu_assert(mean == 10, "ss_stats_mean should be 10 given set [ 10 ]");
+
+        rc = ss_stats_sample(stats, str, 15);
+        mu_assert(rc == 0, "ss_stats_sample unexpectedly failed");
+
+        rc = ss_stats_mean(stats, str, &mean);
+        mu_assert(mean == 12.5, "ss_stats_mean should be 12.5 given set [ 10, 15 ]");
+
+        rc = ss_stats_sample(stats, str, 5);
+        mu_assert(rc == 0, "ss_stats_sample unexpectedly failed");
+
+        rc = ss_stats_mean(stats, str, &mean);
+        mu_assert(mean == 10, "ss_stats_mean should be 10 given set [ 10, 15, 5 ]");
     }
 
     return NULL;

@@ -12,7 +12,7 @@ typedef struct SS_Stats {
 SS_Stats *ss_stats_create();
 
 int ss_stats_add(SS_Stats *stats, bstring key);
-double ss_stats_mean(SS_Stats *stats, bstring key);
+int ss_stats_mean(SS_Stats *stats, bstring key, double *mean);
 
 Stats *ss_stats_dump(SS_Stats *stats, bstring key);
 int ss_stats_delete(SS_Stats *stats, bstring key);

@@ -31,9 +31,21 @@ error:
     return -1;
 }
 
-double ss_stats_mean(SS_Stats *stats, bstring key)
+int ss_stats_mean(SS_Stats *stats, bstring key, double *mean)
 {
-    return 1;
+    check(stats != NULL, "stats cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+
+    Stats *currStats = Hashmap_get(stats->data, key);
+    check(currStats != NULL, "key does not exist in stats");
+    check(currStats->count > 0, "stats should have at least 1 element for calculating mean");
+
+    *mean = Stats_mean(currStats);
+
+    return 0;
+
+error:
+    return -1;
 }
 
 Stats *ss_stats_dump(SS_Stats *stats, bstring key)
