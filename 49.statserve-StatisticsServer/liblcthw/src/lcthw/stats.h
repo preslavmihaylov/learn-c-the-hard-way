@@ -23,4 +23,6 @@ double Stats_stddev(Stats *stats);
 void Stats_sample(Stats *stats, double sample);
 void Stats_dump(Stats *stats);
 
+void Stats_destroy(Stats *stats);
+
 #endif // LCTHW_STATS_H

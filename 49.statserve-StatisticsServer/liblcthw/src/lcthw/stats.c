@@ -94,3 +94,7 @@ void Stats_dump(Stats *stats)
         stats->max, Stats_mean(stats), Stats_stddev(stats));
 }
 
+void Stats_destroy(Stats *stats)
+{
+    free(stats);
+}
