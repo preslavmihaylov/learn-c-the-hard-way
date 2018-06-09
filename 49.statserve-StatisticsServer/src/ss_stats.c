@@ -14,16 +14,16 @@ error:
     return NULL;
 }
 
-int ss_stats_add(SS_Stats *stats, bstring name)
+int ss_stats_add(SS_Stats *stats, bstring key)
 {
     check(stats != NULL, "ss_stats cannot be null");
     check(stats->data != NULL, "ss_stats->data cannot be NULL");
-    check(name != NULL, "Name cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
 
     Stats *newStats = Stats_create();
     check_mem(newStats);
 
-    Hashmap_set(stats->data, name, newStats);
+    Hashmap_set(stats->data, key, newStats);
 
     return 0;
 
@@ -31,22 +31,42 @@ error:
     return -1;
 }
 
-double ss_stats_mean(SS_Stats *stats, bstring name)
+double ss_stats_mean(SS_Stats *stats, bstring key)
 {
     return 0;
 }
 
-Stats *ss_stats_dump(SS_Stats *stats, bstring name)
+Stats *ss_stats_dump(SS_Stats *stats, bstring key)
 {
+    check(stats != NULL, "stats cannot be NULL");
+    check(stats->data != NULL, "stats->data cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+
+    return Hashmap_get(stats->data, key);
+
+error:
     return NULL;
 }
 
-void ss_stats_delete(SS_Stats *stats, bstring name)
+void ss_stats_delete(SS_Stats *stats, bstring key)
 {
 }
 
-void ss_stats_sample(SS_Stats *stats, bstring name, double sample)
+int ss_stats_sample(SS_Stats *stats, bstring key, double sample)
 {
+    check(stats != NULL, "stats cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+    check(stats->data != NULL, "stats->data cannot be NULL");
+
+    Stats *currStats = Hashmap_get(stats->data, key);
+    check(currStats != NULL, "key does not exist");
+
+    Stats_sample(currStats, sample);
+
+    return 0;
+
+error:
+    return -1;
 }
 
 void ss_stats_destroy(SS_Stats *stats)

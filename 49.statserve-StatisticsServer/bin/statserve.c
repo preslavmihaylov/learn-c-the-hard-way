@@ -1,6 +1,6 @@
 #include <server.h>
 #include <unistd.h>
-#include <dbg.h>
+#include <lcthw/dbg.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/wait.h>
