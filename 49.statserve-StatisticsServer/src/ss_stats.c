@@ -68,6 +68,7 @@ int ss_stats_delete(SS_Stats *stats, bstring key)
 
     void *data = Hashmap_delete(stats->data, key);
     check(data != NULL, "Hashmap failed to delete data");
+    Stats_destroy((Stats *)data);
 
     return 0;
 
@@ -92,11 +93,24 @@ error:
     return -1;
 }
 
+void ss_stats_traverse(SS_Stats *stats, ss_stats_traverse_cb cb)
+{
+    Hashmap_traverse(stats->data, (Hashmap_traverse_cb)cb);
+}
+
+static bool stats_destroy_cb(void *key, void *data)
+{
+    Stats_destroy((Stats *)data);
+    return true;
+}
+
 void ss_stats_destroy(SS_Stats *stats)
 {
     if (stats)
     {
+        Hashmap_traverse(stats->data, stats_destroy_cb);
         if (stats->data) Hashmap_destroy(stats->data);
+
         free(stats);
     }
 }

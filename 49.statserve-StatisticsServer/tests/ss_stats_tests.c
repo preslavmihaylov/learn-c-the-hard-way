@@ -7,6 +7,8 @@ char *test_create()
     mu_assert(stats != NULL, "Failed to create stats");
     mu_assert(stats->data != NULL, "Failed to create stats hashmap");
 
+    ss_stats_destroy(stats);
+
     return NULL;
 }
 
@@ -14,8 +16,10 @@ char *test_add()
 {
     int rc;
     SS_Stats *stats = ss_stats_create();
+    bstring str = bfromcstr("sample");
+
     {
-        rc = ss_stats_add(NULL, bfromcstr("sample"));
+        rc = ss_stats_add(NULL, str);
         mu_assert(rc != 0, "ss_stats_add should fail when stats is NULL");
     }
 
@@ -26,15 +30,23 @@ char *test_add()
 
     {
         SS_Stats *brokenStats = ss_stats_create();
+        Hashmap *bstatsData = brokenStats->data;
         brokenStats->data = NULL;
-        rc = ss_stats_add(brokenStats, bfromcstr("sample"));
+
+        rc = ss_stats_add(brokenStats, str);
         mu_assert(rc != 0, "ss_stats_add should fail when stats is broken");
+
+        ss_stats_destroy(brokenStats);
+        Hashmap_destroy(bstatsData);
     }
 
     {
-        ss_stats_add(stats, bfromcstr("sample"));
-        mu_assert(Hashmap_get(stats->data, bfromcstr("sample")) != NULL, "Failed to add statistics");
+        ss_stats_add(stats, str);
+        mu_assert(Hashmap_get(stats->data, str) != NULL, "Failed to add statistics");
     }
+
+    ss_stats_destroy(stats);
+    bdestroy(str);
 
     return NULL;
 }
@@ -57,10 +69,14 @@ char *test_sample()
 
     {
         SS_Stats *brokenStats = ss_stats_create();
+        Hashmap *bstatsData = brokenStats->data;
         brokenStats->data = NULL;
 
         rc = ss_stats_sample(brokenStats, str, 10);
         mu_assert(rc != 0, "expected to fail ss_stats_sample when stats are broken");
+
+        ss_stats_destroy(brokenStats);
+        Hashmap_destroy(bstatsData);
     }
 
     {
@@ -76,6 +92,9 @@ char *test_sample()
         mu_assert(currStats->sum == 10, "ss_stats_sample failed to add sample correctly");
     }
 
+    ss_stats_destroy(stats);
+    bdestroy(str);
+
     return NULL;
 }
 
@@ -85,7 +104,6 @@ char *test_mean()
     double mean = 0;
     SS_Stats *stats = ss_stats_create();
     bstring str = bfromcstr("sample");
-    (void)stats;
 
     {
         rc = ss_stats_mean(NULL, str, &mean);
@@ -128,6 +146,9 @@ char *test_mean()
         mu_assert(mean == 10, "ss_stats_mean should be 10 given set [ 10, 15, 5 ]");
     }
 
+    ss_stats_destroy(stats);
+    bdestroy(str);
+
     return NULL;
 }
 
@@ -149,10 +170,14 @@ char *test_dump()
 
     {
         SS_Stats *brokenStats = ss_stats_create();
+        Hashmap *bstatsData = brokenStats->data;
         brokenStats->data = NULL;
 
         Stats *dumpedStats = ss_stats_dump(brokenStats, str);
         mu_assert(dumpedStats == NULL, "expected ss_stats_dump to return NULL when structure is broken");
+
+        ss_stats_destroy(brokenStats);
+        Hashmap_destroy(bstatsData);
     }
 
     {
@@ -171,6 +196,9 @@ char *test_dump()
         Stats *dumpedStats = ss_stats_dump(stats, str);
         mu_assert(currStats == dumpedStats, "ss_stats_dump returned wrong results");
     }
+
+    ss_stats_destroy(stats);
+    bdestroy(str);
 
     return NULL;
 }
@@ -210,6 +238,62 @@ char *test_delete()
         mu_assert(dumpedStats == NULL, "dumped stats after delete are unexpectedly not NULL");
     }
 
+    ss_stats_destroy(stats);
+    bdestroy(str);
+
+    return NULL;
+}
+
+static int traverse_cnt = 0;
+bool stats_traverse_cb(bstring key, Stats *data)
+{
+    check(key != NULL, "key cannot be NULL");
+    check(data != NULL, "data cannot be NULL");
+
+    log_info("Key: %s", bdata(key));
+    Stats_dump(data);
+
+    traverse_cnt++;
+
+    return true;
+
+error:
+    return false;
+}
+
+char *test_traverse()
+{
+    SS_Stats *stats = ss_stats_create();
+    bstring str1 = bfromcstr("sample1");
+    bstring str2 = bfromcstr("sample2");
+    bstring str3 = bfromcstr("sample3");
+
+    int rc = ss_stats_add(stats, str1);
+    mu_assert(rc == 0, "ss_stats_add failed unexpectedly");
+
+    rc = ss_stats_add(stats, str2);
+    mu_assert(rc == 0, "ss_stats_add failed unexpectedly");
+
+    rc = ss_stats_add(stats, str3);
+    mu_assert(rc == 0, "ss_stats_add failed unexpectedly");
+
+    ss_stats_sample(stats, str1, 10);
+    mu_assert(rc == 0, "ss_stats_sample failed unexpectedly");
+
+    ss_stats_sample(stats, str2, 5);
+    mu_assert(rc == 0, "ss_stats_sample failed unexpectedly");
+
+    ss_stats_sample(stats, str3, 15);
+    mu_assert(rc == 0, "ss_stats_sample failed unexpectedly");
+
+    ss_stats_traverse(stats, stats_traverse_cb);
+    mu_assert(traverse_cnt == 3, "traverse count is wrong after traverse");
+
+    ss_stats_destroy(stats);
+    bdestroy(str1);
+    bdestroy(str2);
+    bdestroy(str3);
+
     return NULL;
 }
 
@@ -223,6 +307,7 @@ char *all_tests()
     mu_run_test(test_mean);
     mu_run_test(test_dump);
     mu_run_test(test_delete);
+    mu_run_test(test_traverse);
 
     return NULL;
 }

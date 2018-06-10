@@ -19,6 +19,9 @@ int ss_stats_delete(SS_Stats *stats, bstring key);
 
 int ss_stats_sample(SS_Stats *stats, bstring key, double sample);
 
+typedef bool (*ss_stats_traverse_cb) (bstring key, Stats *currStats);
+void ss_stats_traverse(SS_Stats *stats, ss_stats_traverse_cb cb);
+
 void ss_stats_destroy(SS_Stats *stats);
 
 #endif // _ss_stats_h
