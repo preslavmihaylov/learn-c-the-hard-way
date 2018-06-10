@@ -16,7 +16,7 @@ typedef struct SS_Command {
     void *data;
 } SS_Command;
 
-SS_Command ss_command_create();
+SS_Command *ss_command_create();
 
 int parse_cmd(SS_Command *cmd, bstring line);
 
