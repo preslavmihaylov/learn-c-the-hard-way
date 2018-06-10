@@ -23,7 +23,7 @@ typedef struct HashmapNode
 	void *data;
 } HashmapNode;
 
-typedef bool (*Hashmap_traverse_cb) (HashmapNode *node);
+typedef bool (*Hashmap_traverse_cb) (void *key, void *data);
 
 Hashmap *Hashmap_create(Hashmap_compare compare, Hashmap_hash hash);
 void Hashmap_destroy(Hashmap *map);

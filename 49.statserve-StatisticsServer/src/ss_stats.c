@@ -94,4 +94,9 @@ error:
 
 void ss_stats_destroy(SS_Stats *stats)
 {
+    if (stats)
+    {
+        if (stats->data) Hashmap_destroy(stats->data);
+        free(stats);
+    }
 }
