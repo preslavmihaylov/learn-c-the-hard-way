@@ -42,7 +42,8 @@ void Hashmap_destroy(Hashmap *map)
 
             for (uint32_t j = 0; j < DArray_count(bucket); ++j)
             {
-                DArray_destroy(DArray_get(bucket, j));
+                HashmapNode *node = DArray_get(bucket, j);
+                if (node) free(node);
             }
 
             DArray_destroy(bucket);
@@ -94,7 +95,7 @@ void *Hashmap_get(Hashmap *map, void *key)
     for (uint32_t i = 0; i < DArray_count(bucket); ++i)
     {
         HashmapNode *node = DArray_get(bucket, i);
-        check(node != NULL, "DArray_get returned empty node");
+        check(node != NULL, "DArray returned NULL element");
 
         if (map->compare(node->key, key) == 0)
         {
@@ -121,8 +122,9 @@ bool Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb)
         for (uint32_t j = 0; j < DArray_count(bucket); ++j)
         {
             HashmapNode *node = DArray_get(bucket, j);
+            check(node != NULL, "DArray returned NULL element");
 
-            callbackResult = traverse_cb(node);
+            callbackResult = traverse_cb(node->key, node->data);
             check(callbackResult == true,
                   "Traverse callback returned false");
         }
@@ -147,12 +149,16 @@ void *Hashmap_delete(Hashmap *map, void *key)
     for (uint32_t i = 0; i < DArray_count(bucket); ++i)
     {
         HashmapNode *node = DArray_get(bucket, i);
-        check(node != NULL, "DArray_get returned empty node");
+        check(node != NULL, "DArray_get returned NULL element");
 
         if (map->compare(node->key, key) == 0)
         {
             DArray_remove(bucket, i);
-            return node->data;
+
+            void *nodeData = node->data;
+            free(node);
+
+            return nodeData;
         }
     }
 

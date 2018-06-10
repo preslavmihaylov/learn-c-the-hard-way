@@ -12,7 +12,7 @@ char *test_create()
     mu_assert(array->contents != NULL, "contents are wrong in darray");
     mu_assert(array->count == 0, "end isn't at the right spot");
     mu_assert(array->element_size == sizeof(int), "element size is wrong.");
-    mu_assert(array->capacity == 100, 
+    mu_assert(array->capacity == 100,
 		"wrong capacity on initialise");
 
     return NULL;
@@ -29,9 +29,11 @@ char *test_new()
 {
     val1 = DArray_new(array);
     mu_assert(val1 != NULL, "failed to make a new element");
+    *val1 = 5;
 
     val2 = DArray_new(array);
     mu_assert(val2 != NULL, "failed to make a new element");
+    *val2 = 10;
 
     return NULL;
 }
@@ -54,16 +56,24 @@ char *test_get()
 
 char *test_remove()
 {
+    uint32_t old_count = DArray_count(array);
     int *val_check = DArray_remove(array, 0);
+
     mu_assert(val_check != NULL, "should not get NULL");
     mu_assert(*val_check == *val1, "Should get first value.");
-    mu_assert(DArray_get(array, 0) == NULL, "Should be gone.");
+    mu_assert((int *)DArray_get(array, 0) != val1, "Should be gone.");
+    mu_assert(DArray_count(array) == old_count - 1, "DArray didn't change count after remove");
+
     DArray_free(val_check);
 
-    val_check = DArray_remove(array, 1);
+    old_count = DArray_count(array);
+    val_check = DArray_remove(array, 0);
+
     mu_assert(val_check != NULL, "should not get NULL");
     mu_assert(*val_check == *val2, "Should get the second value");
-    mu_assert(DArray_get(array, 1) == NULL, "should be gone.");
+    mu_assert((int *)DArray_get(array, 0) != val2, "Should be gone.");
+    mu_assert(DArray_count(array) == old_count - 1, "DArray didn't change count after remove");
+
     DArray_free(val_check);
 
     return NULL;
@@ -74,9 +84,9 @@ char *test_expand_contract()
     int old_capacity = array->capacity;
     DArray_expand(array);
     mu_assert(
-		(unsigned int)array->capacity == old_capacity + array->expand_rate, 
+		(unsigned int)array->capacity == old_capacity + array->expand_rate,
         "wrong size after expand");
-    
+
 	DArray_contract(array);
     mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
@@ -84,7 +94,7 @@ char *test_expand_contract()
     DArray_contract(array);
     mu_assert((unsigned int)array->capacity == array->expand_rate + 1,
         "Should stay at the expand_rate at least.");
-    
+
 	return NULL;
 }
 

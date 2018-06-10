@@ -11,17 +11,17 @@ struct tagbstring expect1 = bsStatic("THE VALUE 1");
 struct tagbstring expect2 = bsStatic("THE VALUE 2");
 struct tagbstring expect3 = bsStatic("THE VALUE 3");
 
-static bool traverse_good_cb(HashmapNode *node)
+static bool traverse_good_cb(void *key, void *value)
 {
-    debug("KEY: %s", bdata((bstring)node->key));
+    debug("KEY: %s", bdata((bstring)key));
     traverse_called++;
 
     return true;
 }
 
-static bool traverse_fail_cb(HashmapNode *node)
+static bool traverse_fail_cb(void *key, void *value)
 {
-    debug("KEY: %s", bdata((bstring)node->key));
+    debug("KEY: %s", bdata((bstring)key));
     traverse_called++;
 
     if (traverse_called == 2)
