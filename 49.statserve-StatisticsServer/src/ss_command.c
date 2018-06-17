@@ -3,6 +3,9 @@
 #include <lcthw/dbg.h>
 #include <stdbool.h>
 
+static bool ss_command_isNumber(bstring str);
+static SS_CmdType ss_command_getCmdType(struct bstrList *tokens);
+
 SS_Command *ss_command_create()
 {
     SS_Command *cmd = calloc(1, sizeof(SS_Command));
@@ -14,18 +17,43 @@ error:
     return NULL;
 }
 
-SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
+static bool ss_command_isNumber(bstring str)
+{
+    for (int i = 0; i < blength(str); i++)
+    {
+        if (!isdigit(bdata(str)[0])) return false;
+    }
+
+    return true;
+}
+
+static SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
 {
     char *firstEntry = bdata(tokens->entry[0]);
     if (strcmp(firstEntry, "create") == 0)
     {
-        log_info("Create cmd matched");
         check(tokens->qty == 2, "Invalid cmd length for create");
-
         return SS_CmdType_Create;
     }
+    else if (strcmp(firstEntry, "mean") == 0)
+    {
+        check(tokens->qty == 2, "Invalid cmd length for mean");
+        return SS_CmdType_Mean;
+    }
+    else if (strcmp(firstEntry, "dump") == 0)
+    {
+        check(tokens->qty == 2, "Invalid cmd length for dump");
+        return SS_CmdType_Dump;
+    }
+    else if (strcmp(firstEntry, "sample") == 0)
+    {
+        check(tokens->qty == 3, "Invalid cmd length for sample");
+        check(ss_command_isNumber(tokens->entry[2]), "Second Param for sample is expected to be numeric");
 
-error:
+        return SS_CmdType_Sample;
+    }
+
+error: // fallthrough
     return SS_CmdType_None;
 }
 
@@ -36,12 +64,14 @@ SS_Command *ss_command_parse(bstring line)
     check(line != NULL, "Line cannot be NULL");
 
     struct bstrList *tokens = bsplit(line, ' ');
+
     SS_CmdType cmdType = ss_command_getCmdType(tokens);
     check(cmdType != SS_CmdType_None, "command format invalid");
 
     cmd = ss_command_create();
     cmd->cmdType = cmdType;
-    cmd->parm1 = bstrcpy(tokens->entry[1]);
+    if (tokens->qty >= 2) cmd->parm1 = bstrcpy(tokens->entry[1]);
+    if (tokens->qty >= 3) cmd->parm2 = bstrcpy(tokens->entry[2]);
 
     rc = bstrListDestroy(tokens);
     check(rc == 0, "bstrListDestroy returned bad exit code");
