@@ -11,8 +11,6 @@ char *test_create()
 
 char *test_parse()
 {
-    bstring str = bfromcstr("");
-
     {
         SS_Command *res = ss_command_parse(NULL);
         mu_assert(res == NULL, "ss_command_parse expected to return NULL when given NULL");
@@ -27,9 +25,29 @@ char *test_parse()
         mu_assert(res->cmdType == SS_CmdType_Create, "Wrong cmd type");
         mu_assert(bstrcmp(res->parm1, expectedKey) == 0, "Wrong key after create");
         mu_assert(res->parm2 == NULL, "Param 2 is expected to not be set after create");
+
+        bdestroy(str);
+        bdestroy(expectedKey);
     }
 
-    bdestroy(str);
+    {
+        bstring str = bfromcstr("create");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when create command is invalid");
+
+        bdestroy(str);
+    }
+
+    {
+        bstring str = bfromcstr("create aaaa aaaa");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when create command is invalid");
+
+        bdestroy(str);
+    }
+
     return NULL;
 }
 
