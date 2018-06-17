@@ -60,10 +60,12 @@ error: // fallthrough
 SS_Command *ss_command_parse(bstring line)
 {
     SS_Command *cmd = NULL;
+    struct bstrList *tokens = NULL;
     int rc = 0;
+
     check(line != NULL, "Line cannot be NULL");
 
-    struct bstrList *tokens = bsplit(line, ' ');
+    tokens = bsplit(line, ' ');
 
     SS_CmdType cmdType = ss_command_getCmdType(tokens);
     check(cmdType != SS_CmdType_None, "command format invalid");
@@ -80,6 +82,7 @@ SS_Command *ss_command_parse(bstring line)
 
 error:
     if (cmd) ss_command_destroy(cmd);
+    if (tokens) bstrListDestroy(tokens);
 
     return NULL;
 }

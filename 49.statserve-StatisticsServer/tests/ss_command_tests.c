@@ -5,6 +5,7 @@ char *test_create()
 {
     SS_Command *cmd = ss_command_create();
     mu_assert(cmd != NULL, "ss_command_create returned NULL");
+    ss_command_destroy(cmd);
 
     return NULL;
 }
@@ -28,6 +29,7 @@ char *test_parse()
 
         bdestroy(str);
         bdestroy(expectedParm1);
+        ss_command_destroy(res);
     }
 
     {
@@ -60,6 +62,7 @@ char *test_parse()
 
         bdestroy(str);
         bdestroy(expectedParm1);
+        ss_command_destroy(res);
     }
 
     {
@@ -92,6 +95,7 @@ char *test_parse()
 
         bdestroy(str);
         bdestroy(expectedParm1);
+        ss_command_destroy(res);
     }
 
     {
@@ -126,6 +130,7 @@ char *test_parse()
         bdestroy(str);
         bdestroy(expectedParm1);
         bdestroy(expectedParm2);
+        ss_command_destroy(res);
     }
 
     {
