@@ -23,6 +23,9 @@ int ss_stats_add(SS_Stats *stats, bstring key)
     Stats *newStats = Stats_create();
     check_mem(newStats);
 
+    void *val = Hashmap_get(stats->data, key);
+    check(val == NULL, "Key already exists in stats");
+
     Hashmap_set(stats->data, key, newStats);
 
     return 0;

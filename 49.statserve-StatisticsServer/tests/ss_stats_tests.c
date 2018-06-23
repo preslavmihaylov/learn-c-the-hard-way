@@ -45,6 +45,14 @@ char *test_add()
         mu_assert(Hashmap_get(stats->data, str) != NULL, "Failed to add statistics");
     }
 
+    {
+        ss_stats_add(stats, str);
+        mu_assert(Hashmap_get(stats->data, str) != NULL, "Failed to add statistics");
+
+        rc = ss_stats_add(stats, str);
+        mu_assert(rc != 0, "Stats expected to fail when adding duplicate key");
+    }
+
     ss_stats_destroy(stats);
     bdestroy(str);
 
