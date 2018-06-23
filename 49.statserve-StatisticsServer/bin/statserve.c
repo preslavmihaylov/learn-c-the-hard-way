@@ -91,6 +91,16 @@ int execute_cmd(int client_fd, SS_Stats *stats, SS_Command *cmd)
             resultStr = bformat("Successfully sampled %s for key %s\n", bdata(cmd->parm2), bdata(cmd->parm1));
             break;
         }
+        case SS_CmdType_Exit:
+        {
+            check(cmd->paramsCnt == 0, "Invalid params cnt for exit cmd");
+
+            resultStr = bformat("Closing connection by request from client.\n");
+            printf("%s", bdata(resultStr));
+            write(client_fd, bdata(resultStr), blength(resultStr)+1);
+
+            exit(0);
+        }
         default:
         {
             check(false, "Invalid command detected");
@@ -177,7 +187,7 @@ error: // fallthrough
     }
 
     printf("connection with client closed\n");
-    exit(0);
+    exit(-1);
 }
 
 int main(int argc, char *argv[])
