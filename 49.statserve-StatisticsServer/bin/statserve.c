@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <lcthw/bstrlib.h>
+#include <ss_command.h>
 
 void handle_sigchild(int sig)
 {
@@ -27,9 +29,51 @@ error:
     return -1;
 }
 
-int main(int argc, char *argv[])
+void child_handler(int client_fd)
 {
     char str[100];
+    bstring line;
+    SS_Command *cmd;
+    int rc = 0;
+
+    while (true)
+    {
+        bzero(str, 100);
+        rc = read(client_fd, str, 100);
+        if (rc <= 0) break;
+
+        line = bfromcstr(str);
+        cmd = ss_command_parse(line);
+        if (cmd == NULL)
+        {
+            char *errorMsg = "Invalid command format. Closing connection";
+            write(client_fd, errorMsg, strlen(errorMsg)+1);
+            check(false, "Invalid command format. Closing connection");
+        }
+
+        printf("Echoing back - %s", str);
+
+        //write(client_fd, str, strlen(str)+1);
+        write(client_fd, bdata(line), blength(line)+1);
+
+        bdestroy(line);
+        ss_command_destroy(cmd);
+
+        continue;
+
+    error:
+        if (line) bdestroy(line);
+        if (cmd) ss_command_destroy(cmd);
+
+        break;
+    }
+
+    printf("connection with client closed\n");
+    exit(0);
+}
+
+int main(int argc, char *argv[])
+{
     int rc;
     int server_fd;
 
@@ -49,18 +93,7 @@ int main(int argc, char *argv[])
         if (child_rc == 0)
         {
             // child process here
-            while (true)
-            {
-                bzero(str, 100);
-                rc = read(client_fd, str, 100);
-                if (rc <= 0) break;
-
-                printf("Echoing back - %s", str);
-                write(client_fd, str, strlen(str)+1);
-            }
-
-            printf("connection with client closed\n");
-            exit(0);
+            child_handler(client_fd);
         }
         else
         {
