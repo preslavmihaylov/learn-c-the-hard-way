@@ -65,7 +65,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LIBS)
 
 $(BIN_DIR)/%.exe: $(BIN_DIR)/%.c
-	$(CC) $(CFLAGS) $< $(SLIB_TARGET) $(LIBLCTHW) -o $@
+	$(CC) $(CFLAGS) $< $(SLIB_TARGET) $(LIBLCTHW) -o $@ $(LIBS)
 
 $(TESTS_DIR)/%.tst: $(TESTS_DIR)/%.c
 	$(CC) $(CFLAGS) $< $(SLIB_TARGET) $(LIBLCTHW) -o $@ $(LIBS)
