@@ -160,6 +160,28 @@ char *test_parse()
         bdestroy(str);
     }
 
+    {
+        bstring str = bfromcstr("exit");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res != NULL, "ss_command_parse unexpectedly returned NULL");
+        mu_assert(res->cmdType == SS_CmdType_Exit, "Wrong cmd type");
+        mu_assert(res->parm1 == NULL, "Param 1 is expected to not be set after exit");
+        mu_assert(res->parm2 == NULL, "Param 2 is expected to not be set after exit");
+
+        bdestroy(str);
+        ss_command_destroy(res);
+    }
+
+    {
+        bstring str = bfromcstr("exit aaa");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when dump command is invalid");
+
+        bdestroy(str);
+    }
+
     return NULL;
 }
 
