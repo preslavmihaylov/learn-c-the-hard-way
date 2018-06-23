@@ -3,10 +3,20 @@
 #include <lcthw/dbg.h>
 #include <stdbool.h>
 
+static SS_Command *ss_command_create();
 static bool ss_command_isNumber(bstring str);
 static SS_CmdType ss_command_getCmdType(struct bstrList *tokens);
 
-SS_Command *ss_command_create()
+static int cmdParamsCnt[SS_CmdType_Count] =
+{
+    0, // SS_CmdType_None
+    1, // SS_CmdType_Create
+    1, // SS_CmdType_Mean
+    2, // SS_CmdType_Sample
+    1  // SS_CmdType_Dump
+};
+
+static SS_Command *ss_command_create()
 {
     SS_Command *cmd = calloc(1, sizeof(SS_Command));
     check_mem(cmd);
@@ -32,22 +42,22 @@ static SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
     char *firstEntry = bdata(tokens->entry[0]);
     if (strcmp(firstEntry, "create") == 0)
     {
-        check(tokens->qty == 2, "Invalid cmd length for create");
+        check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Create], "Invalid cmd length for create");
         return SS_CmdType_Create;
     }
     else if (strcmp(firstEntry, "mean") == 0)
     {
-        check(tokens->qty == 2, "Invalid cmd length for mean");
+        check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Mean], "Invalid cmd length for mean");
         return SS_CmdType_Mean;
     }
     else if (strcmp(firstEntry, "dump") == 0)
     {
-        check(tokens->qty == 2, "Invalid cmd length for dump");
+        check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Dump], "Invalid cmd length for dump");
         return SS_CmdType_Dump;
     }
     else if (strcmp(firstEntry, "sample") == 0)
     {
-        check(tokens->qty == 3, "Invalid cmd length for sample");
+        check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Sample], "Invalid cmd length for sample");
         check(ss_command_isNumber(tokens->entry[2]), "Second Param for sample is expected to be numeric");
 
         return SS_CmdType_Sample;
@@ -72,8 +82,9 @@ SS_Command *ss_command_parse(bstring line)
 
     cmd = ss_command_create();
     cmd->cmdType = cmdType;
-    if (tokens->qty >= 2) cmd->parm1 = bstrcpy(tokens->entry[1]);
-    if (tokens->qty >= 3) cmd->parm2 = bstrcpy(tokens->entry[2]);
+    cmd->paramsCnt = cmdParamsCnt[cmdType];
+    if (cmd->paramsCnt >= 1) cmd->parm1 = bstrcpy(tokens->entry[1]);
+    if (cmd->paramsCnt >= 2) cmd->parm2 = bstrcpy(tokens->entry[2]);
 
     rc = bstrListDestroy(tokens);
     check(rc == 0, "bstrListDestroy returned bad exit code");

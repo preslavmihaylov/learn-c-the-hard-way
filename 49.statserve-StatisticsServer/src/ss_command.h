@@ -14,11 +14,11 @@ typedef enum {
 
 typedef struct SS_Command {
     SS_CmdType cmdType;
+    int paramsCnt;
     bstring parm1;
     bstring parm2;
 } SS_Command;
 
-SS_Command *ss_command_create();
 SS_Command *ss_command_parse(bstring line);
 void ss_command_destroy(SS_Command *cmd);
 
