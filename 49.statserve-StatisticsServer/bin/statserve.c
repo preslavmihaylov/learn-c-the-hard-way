@@ -66,7 +66,18 @@ int execute_cmd(int client_fd, SS_Stats *stats, SS_Command *cmd)
         }
         case SS_CmdType_Dump:
         {
-            // TODO
+            check(cmd->paramsCnt == 1, "Invalid params cnt for dump cmd");
+
+            Stats *currStats = ss_stats_dump(stats, cmd->parm1);
+            check(currStats != NULL, "Failed to dump stats for key %s", bdata(cmd->parm1));
+
+            resultStr = bformat("Dumped stats: "
+                "sum=%.2f, sumsq=%.2f, count=%u, "
+                "min=%.2f, max=%.2f, mean=%.2f, stddev=%.2f\n",
+                currStats->sum, currStats->sumsq, currStats->count,
+                currStats->min, currStats->max,
+                Stats_mean(currStats), Stats_stddev(currStats));
+
             break;
         }
         case SS_CmdType_Sample:
