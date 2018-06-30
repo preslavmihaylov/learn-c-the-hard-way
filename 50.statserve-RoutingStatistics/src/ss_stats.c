@@ -20,11 +20,11 @@ int ss_stats_add(SS_Stats *stats, bstring key)
     check(stats->data != NULL, "ss_stats->data cannot be NULL");
     check(key != NULL, "key cannot be NULL");
 
-    Stats *newStats = Stats_create();
-    check_mem(newStats);
-
     void *val = Hashmap_get(stats->data, key);
     check(val == NULL, "Key already exists in stats");
+
+    Stats *newStats = Stats_create();
+    check_mem(newStats);
 
     Hashmap_set(stats->data, key, newStats);
 

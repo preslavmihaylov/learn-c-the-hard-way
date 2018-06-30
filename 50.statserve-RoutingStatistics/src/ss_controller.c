@@ -94,19 +94,20 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
 {
     int rc = 0;
     bstring currentPath = NULL;
+    bstring keyToAdd = NULL;
     struct bstrList *tokens = bsplit(key, '/');
 
     currentPath = bfromcstr("");
 
     // add root key and ignore "Key already exists" error
-    ss_stats_add(stats, bstrcpy(&ROOT_KEY));
+    keyToAdd = bstrcpy(&ROOT_KEY);
+    rc = ss_stats_add(stats, keyToAdd);
+    if (rc != 0) bdestroy(keyToAdd);
 
 
     // skip empty token at start
     for (int i = 1; i < tokens->qty - 1; i++)
     {
-        log_info("token %s of path %s", bdata(tokens->entry[i]), bdata(key));
-
         rc = bconcat(currentPath, &ROOT_KEY);
         check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
 
@@ -114,7 +115,9 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
         check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[i]));
 
         // ignore "key already exists" error
-        ss_stats_add(stats, bstrcpy(currentPath));
+        keyToAdd = bstrcpy(currentPath);
+        rc = ss_stats_add(stats, keyToAdd);
+        if (rc != 0) bdestroy(keyToAdd);
     }
 
     rc = bconcat(currentPath, &ROOT_KEY);
@@ -124,17 +127,20 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
     check(rc == 0, "bconcat for %s and %s failed",
         bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
 
-    rc = ss_stats_add(stats, bstrcpy(currentPath));
+    keyToAdd = bstrcpy(currentPath);
+    rc = ss_stats_add(stats, keyToAdd);
     check(rc == 0, "ss_stats_add failed");
 
     bstrListDestroy(tokens);
     bdestroy(currentPath);
+    // keyToAdd not destroyed on purpose
 
     return 0;
 
 error:
     if (tokens) bstrListDestroy(tokens);
     if (currentPath) bdestroy(currentPath);
+    if (keyToAdd) bdestroy(keyToAdd);
 
     return -1;
 }

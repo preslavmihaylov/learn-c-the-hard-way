@@ -31,6 +31,8 @@ error:
 
 bool stats_destroy_keys_cb(bstring key, Stats *currStats)
 {
+    log_info("Destroying key %s", bdata(key));
+
     if (key) bdestroy(key);
     return true;
 }
