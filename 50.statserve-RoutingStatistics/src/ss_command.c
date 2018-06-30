@@ -6,6 +6,7 @@
 static SS_Command *ss_command_create();
 static bool ss_command_isNumber(bstring str);
 static SS_CmdType ss_command_getCmdType(struct bstrList *tokens);
+static bool ss_command_is_url(bstring key);
 
 static int cmdParamsCnt[SS_CmdType_Count] =
 {
@@ -44,6 +45,8 @@ static SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
     if (strcmp(firstEntry, "create") == 0)
     {
         check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Create], "Invalid cmd length for create");
+        check(ss_command_is_url(tokens->entry[1]), "Invalid url provided");
+
         return SS_CmdType_Create;
     }
     else if (strcmp(firstEntry, "mean") == 0)
@@ -72,6 +75,11 @@ static SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
 
 error: // fallthrough
     return SS_CmdType_None;
+}
+
+static bool ss_command_is_url(bstring key)
+{
+    return bchar(key, 0) == '/';
 }
 
 SS_Command *ss_command_parse(bstring line)

@@ -9,8 +9,8 @@ char *test_parse()
     }
 
     {
-        bstring str = bfromcstr("create abc");
-        bstring expectedParm1 = bfromcstr("abc");
+        bstring str = bfromcstr("create /abc");
+        bstring expectedParm1 = bfromcstr("/abc");
 
         SS_Command *res = ss_command_parse(str);
         mu_assert(res != NULL, "ss_command_parse unexpectedly returned NULL");
@@ -33,7 +33,7 @@ char *test_parse()
     }
 
     {
-        bstring str = bfromcstr("create aaaa aaaa");
+        bstring str = bfromcstr("create /aaaa /aaaa");
 
         SS_Command *res = ss_command_parse(str);
         mu_assert(res == NULL, "ss_command_parse expected to return NULL when create command is invalid");

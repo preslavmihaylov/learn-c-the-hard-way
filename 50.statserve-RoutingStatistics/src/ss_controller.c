@@ -108,6 +108,8 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
     // skip empty token at start
     for (int i = 1; i < tokens->qty - 1; i++)
     {
+        if (blength(tokens->entry[i]) == 0) continue;
+
         rc = bconcat(currentPath, &ROOT_KEY);
         check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
 
@@ -116,8 +118,11 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
 
         // ignore "key already exists" error
         keyToAdd = bstrcpy(currentPath);
+        log_info("adding key %s", bdata(keyToAdd));
+
         rc = ss_stats_add(stats, keyToAdd);
         if (rc != 0) bdestroy(keyToAdd);
+
     }
 
     rc = bconcat(currentPath, &ROOT_KEY);
@@ -128,6 +133,8 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
         bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
 
     keyToAdd = bstrcpy(currentPath);
+    log_info("adding key %s", bdata(keyToAdd));
+
     rc = ss_stats_add(stats, keyToAdd);
     check(rc == 0, "ss_stats_add failed");
 

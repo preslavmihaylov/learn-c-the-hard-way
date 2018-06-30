@@ -57,7 +57,7 @@ int process_cmd(int client_fd, SS_Stats *stats, char *cmdStr)
     cmd = ss_command_parse(line);
     if (cmd == NULL)
     {
-        errorMsg = bformat("Invalid command format. Closing connection\n");
+        errorMsg = bformat("Invalid command format.\n");
         rc = -1;
 
         check(false, "Invalid command format. Closing connection");
@@ -66,7 +66,7 @@ int process_cmd(int client_fd, SS_Stats *stats, char *cmdStr)
     rc = ss_controller_execute_cmd(client_fd, stats, cmd, execute_cmd_callback);
     if (rc != 0)
     {
-        errorMsg = bformat("Error executing cmd: %s. Closing connection\n", bdata(line));
+        errorMsg = bformat("Error executing cmd: %s.\n", bdata(line));
         rc = -1;
 
         check(false, "Error executing cmd: %s", bdata(line));
@@ -100,7 +100,8 @@ void child_handler(int client_fd)
         if (rc <= 0) break;
 
         rc = process_cmd(client_fd, stats, str);
-        check(rc == 0, "Error occured while processing command: %s", str);
+        // connection does not close upon wrong cmd
+        //check(rc == 0, "Error occured while processing command: %s", str);
     }
 
 error: // fallthrough
