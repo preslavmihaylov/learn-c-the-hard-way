@@ -1,6 +1,11 @@
 #include <ss_controller.h>
 #include <lcthw/bstrlib.h>
 
+static int ss_controller_create_key(SS_Stats *stats, bstring key);
+static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value);
+
+static struct tagbstring ROOT_KEY = bsStatic("/");
+
 int ss_controller_execute_cmd(
     int client_fd, SS_Stats *stats, SS_Command *cmd, ss_controller_result_cb resultCallback)
 {
@@ -13,7 +18,8 @@ int ss_controller_execute_cmd(
         {
             check(cmd->paramsCnt == 1, "Invalid params cnt for create cmd");
 
-            rc = ss_stats_add(stats, bstrcpy(cmd->parm1));
+            // remember to destroy key
+            rc = ss_controller_create_key(stats, cmd->parm1);
             check(rc == 0, "Failed to add %s key to statistics", bdata(cmd->parm1));
 
             resultStr = bformat("Key %s successfullly added to statistics\n", cmd->parm1);
@@ -51,7 +57,8 @@ int ss_controller_execute_cmd(
             check(cmd->paramsCnt == 2, "Invalid params cnt for sample cmd");
 
             char *parm2 = bdata(cmd->parm2);
-            rc = ss_stats_sample(stats, cmd->parm1, atof(parm2));
+            //rc = ss_stats_sample(stats, cmd->parm1, atof(parm2));
+            rc = ss_controller_sample_key(stats, cmd->parm1, atof(parm2));
             check(rc == 0, "Failed to sample %s for key %s", bdata(cmd->parm2), bdata(cmd->parm1));
 
             resultStr = bformat("Successfully sampled %s for key %s\n", bdata(cmd->parm2), bdata(cmd->parm1));
@@ -82,3 +89,101 @@ error:
 
     return -1;
 }
+
+static int ss_controller_create_key(SS_Stats *stats, bstring key)
+{
+    int rc = 0;
+    bstring currentPath = NULL;
+    struct bstrList *tokens = bsplit(key, '/');
+
+    currentPath = bfromcstr("");
+
+    // add root key and ignore "Key already exists" error
+    ss_stats_add(stats, bstrcpy(&ROOT_KEY));
+
+
+    // skip empty token at start
+    for (int i = 1; i < tokens->qty - 1; i++)
+    {
+        log_info("token %s of path %s", bdata(tokens->entry[i]), bdata(key));
+
+        rc = bconcat(currentPath, &ROOT_KEY);
+        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
+
+        rc = bconcat(currentPath, tokens->entry[i]);
+        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[i]));
+
+        // ignore "key already exists" error
+        ss_stats_add(stats, bstrcpy(currentPath));
+    }
+
+    rc = bconcat(currentPath, &ROOT_KEY);
+    check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
+
+    rc = bconcat(currentPath, tokens->entry[tokens->qty - 1]);
+    check(rc == 0, "bconcat for %s and %s failed",
+        bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
+
+    rc = ss_stats_add(stats, bstrcpy(currentPath));
+    check(rc == 0, "ss_stats_add failed");
+
+    bstrListDestroy(tokens);
+    bdestroy(currentPath);
+
+    return 0;
+
+error:
+    if (tokens) bstrListDestroy(tokens);
+    if (currentPath) bdestroy(currentPath);
+
+    return -1;
+}
+
+static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value)
+{
+    int rc = 0;
+    bstring currentPath = NULL;
+    struct bstrList *tokens = bsplit(key, '/');
+
+    currentPath = bfromcstr("");
+
+    rc = ss_stats_sample(stats, &ROOT_KEY, value);
+    check(rc == 0, "ss_stats_sample failed for root key");
+
+    // skip empty token at start
+    for (int i = 1; i < tokens->qty - 1; i++)
+    {
+        log_info("sampling token %s of path %s", bdata(tokens->entry[i]), bdata(key));
+
+        rc = bconcat(currentPath, &ROOT_KEY);
+        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
+
+        rc = bconcat(currentPath, tokens->entry[i]);
+        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[i]));
+
+        rc = ss_stats_sample(stats, currentPath, value);
+        check(rc == 0, "ss_stats_sample failed for key %s", bdata(currentPath));
+    }
+
+    rc = bconcat(currentPath, &ROOT_KEY);
+    check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
+
+    rc = bconcat(currentPath, tokens->entry[tokens->qty - 1]);
+    check(rc == 0,
+        "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
+
+    rc = ss_stats_sample(stats, currentPath, value);
+    check(rc == 0, "ss_stats_sample failed for key %s", bdata(currentPath));
+
+    bstrListDestroy(tokens);
+    bdestroy(currentPath);
+
+    return 0;
+
+error:
+    if (tokens) bstrListDestroy(tokens);
+    if (currentPath) bdestroy(currentPath);
+
+    return -1;
+}
+

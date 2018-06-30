@@ -85,8 +85,10 @@ int ss_stats_sample(SS_Stats *stats, bstring key, double sample)
     check(key != NULL, "key cannot be NULL");
     check(stats->data != NULL, "stats->data cannot be NULL");
 
+    log_info("ss_stats_sample(%s, %.2f)", bdata(key), sample);
+
     Stats *currStats = Hashmap_get(stats->data, key);
-    check(currStats != NULL, "key does not exist");
+    check(currStats != NULL, "key %s  does not exist", bdata(key));
 
     Stats_sample(currStats, sample);
 
