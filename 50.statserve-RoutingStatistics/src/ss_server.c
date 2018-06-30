@@ -1,6 +1,6 @@
-#include <server.h>
+#include <ss_server.h>
 
-int run_server(int port)
+int ss_server_run(int port)
 {
     int server_fd;
     struct sockaddr_in servaddr;
