@@ -1,8 +1,14 @@
 #include <ss_controller.h>
 #include <lcthw/bstrlib.h>
 
+typedef int (*ss_controller_traverse_cb) (SS_Stats *stats, bstring originalKey, bstring currentKey, double value);
+
 static int ss_controller_create_key(SS_Stats *stats, bstring key);
 static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value);
+static int ss_controller_create_cb(SS_Stats *stats, bstring originalKey, bstring currentKey, double value);
+static int ss_controller_sample_cb(SS_Stats *stats, bstring originalKey, bstring currentKey, double value);
+static int ss_controller_traverse_url(
+    SS_Stats *stats, bstring url, double value, ss_controller_traverse_cb traverseCb);
 
 static struct tagbstring ROOT_KEY = bsStatic("/");
 
@@ -92,18 +98,63 @@ error:
 
 static int ss_controller_create_key(SS_Stats *stats, bstring key)
 {
+    return ss_controller_traverse_url(stats, key, 0, ss_controller_create_cb);
+}
+
+static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value)
+{
+    return ss_controller_traverse_url(stats, key, value, ss_controller_sample_cb);
+}
+
+static int ss_controller_create_cb(SS_Stats *stats, bstring originalKey, bstring currentKey, double value)
+{
+    bstring keyToAdd = NULL;
+    int rc = 0;
+
+    log_info("attempting to add key %s to stats", bdata(currentKey));
+    if (biseq(originalKey, currentKey))
+    {
+        keyToAdd = bstrcpy(currentKey);
+        rc = ss_stats_add(stats, keyToAdd);
+        check(rc == 0, "Failed to add key %s to stats", bdata(keyToAdd));
+    }
+    else
+    {
+        keyToAdd = bstrcpy(currentKey);
+        rc = ss_stats_add(stats, keyToAdd);
+        if (rc != 0) bdestroy(keyToAdd);
+    }
+
+    return 0;
+
+error:
+    if (keyToAdd) bdestroy(keyToAdd);
+
+    return -1;
+}
+
+static int ss_controller_sample_cb(SS_Stats *stats, bstring originalKey, bstring currentKey, double value)
+{
+    int rc = ss_stats_sample(stats, currentKey, value);
+    check(rc == 0, "ss_stats_sample failed for key %s", bdata(currentKey));
+
+    return 0;
+
+error:
+    return -1;
+}
+
+static int ss_controller_traverse_url(
+    SS_Stats *stats, bstring url, double value, ss_controller_traverse_cb traverseCb)
+{
     int rc = 0;
     bstring currentPath = NULL;
-    bstring keyToAdd = NULL;
-    struct bstrList *tokens = bsplit(key, '/');
+    struct bstrList *tokens = bsplit(url, '/');
 
     currentPath = bfromcstr("");
 
-    // add root key and ignore "Key already exists" error
-    keyToAdd = bstrcpy(&ROOT_KEY);
-    rc = ss_stats_add(stats, keyToAdd);
-    if (rc != 0) bdestroy(keyToAdd);
-
+    rc = traverseCb(stats, url, &ROOT_KEY, value);
+    check(rc == 0, "ss_controller_traverse_cb failed for %s", bdata(&ROOT_KEY));
 
     // skip empty token at start
     for (int i = 1; i < tokens->qty - 1; i++)
@@ -116,66 +167,8 @@ static int ss_controller_create_key(SS_Stats *stats, bstring key)
         rc = bconcat(currentPath, tokens->entry[i]);
         check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[i]));
 
-        // ignore "key already exists" error
-        keyToAdd = bstrcpy(currentPath);
-        log_info("adding key %s", bdata(keyToAdd));
-
-        rc = ss_stats_add(stats, keyToAdd);
-        if (rc != 0) bdestroy(keyToAdd);
-
-    }
-
-    rc = bconcat(currentPath, &ROOT_KEY);
-    check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
-
-    rc = bconcat(currentPath, tokens->entry[tokens->qty - 1]);
-    check(rc == 0, "bconcat for %s and %s failed",
-        bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
-
-    keyToAdd = bstrcpy(currentPath);
-    log_info("adding key %s", bdata(keyToAdd));
-
-    rc = ss_stats_add(stats, keyToAdd);
-    check(rc == 0, "ss_stats_add failed");
-
-    bstrListDestroy(tokens);
-    bdestroy(currentPath);
-    // keyToAdd not destroyed on purpose
-
-    return 0;
-
-error:
-    if (tokens) bstrListDestroy(tokens);
-    if (currentPath) bdestroy(currentPath);
-    if (keyToAdd) bdestroy(keyToAdd);
-
-    return -1;
-}
-
-static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value)
-{
-    int rc = 0;
-    bstring currentPath = NULL;
-    struct bstrList *tokens = bsplit(key, '/');
-
-    currentPath = bfromcstr("");
-
-    rc = ss_stats_sample(stats, &ROOT_KEY, value);
-    check(rc == 0, "ss_stats_sample failed for root key");
-
-    // skip empty token at start
-    for (int i = 1; i < tokens->qty - 1; i++)
-    {
-        log_info("sampling token %s of path %s", bdata(tokens->entry[i]), bdata(key));
-
-        rc = bconcat(currentPath, &ROOT_KEY);
-        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(&ROOT_KEY));
-
-        rc = bconcat(currentPath, tokens->entry[i]);
-        check(rc == 0, "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[i]));
-
-        rc = ss_stats_sample(stats, currentPath, value);
-        check(rc == 0, "ss_stats_sample failed for key %s", bdata(currentPath));
+        rc = traverseCb(stats, url, currentPath, value);
+        check(rc == 0, "ss_controller_traverse_cb failed for %s", bdata(currentPath));
     }
 
     rc = bconcat(currentPath, &ROOT_KEY);
@@ -185,8 +178,8 @@ static int ss_controller_sample_key(SS_Stats *stats, bstring key, double value)
     check(rc == 0,
         "bconcat for %s and %s failed", bdata(currentPath), bdata(tokens->entry[tokens->qty - 1]));
 
-    rc = ss_stats_sample(stats, currentPath, value);
-    check(rc == 0, "ss_stats_sample failed for key %s", bdata(currentPath));
+    rc = traverseCb(stats, url, currentPath, value);
+    check(rc == 0, "ss_controller_traverse_cb failed for key %s", bdata(currentPath));
 
     bstrListDestroy(tokens);
     bdestroy(currentPath);
@@ -199,4 +192,3 @@ error:
 
     return -1;
 }
-
