@@ -205,6 +205,29 @@ char *test_parse()
         bdestroy(str);
     }
 
+    {
+        bstring str = bfromcstr("load abc");
+        bstring expectedParm1 = bfromcstr("abc");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res != NULL, "ss_command_parse unexpectedly returned NULL");
+        mu_assert(res->cmdType == SS_CmdType_Load, "Wrong cmd type");
+        mu_assert(bstrcmp(res->parm1, expectedParm1) == 0, "Wrong param 1 after load");
+
+        bdestroy(str);
+        bdestroy(expectedParm1);
+        ss_command_destroy(res);
+    }
+
+    {
+        bstring str = bfromcstr("load aaa aaa");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when load command is invalid");
+
+        bdestroy(str);
+    }
+
     return NULL;
 }
 

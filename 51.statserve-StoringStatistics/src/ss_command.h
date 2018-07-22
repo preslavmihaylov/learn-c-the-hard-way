@@ -10,6 +10,7 @@ typedef enum {
     SS_CmdType_Sample,
     SS_CmdType_Dump,
     SS_CmdType_Store,
+    SS_CmdType_Load,
     SS_CmdType_Exit,
     SS_CmdType_Count
 } SS_CmdType;
