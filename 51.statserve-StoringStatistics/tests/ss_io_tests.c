@@ -33,14 +33,38 @@ char *test_store()
     fread(&storedTstData, sizeof(storedTstData), 1, fp);
     mu_assert(tstDataIsEq(storedTstData, tstDat) == true, "Stored test data is not valid after ss_io_store");
 
-    int rc = remove(bdata(filename));
-    mu_assert(rc == 0, "Failed to delete file after ss_io_store test");
+    fclose(fp);
 
     return NULL;
 }
 
 char *test_load()
 {
+    bstring filename = bfromcstr("testdat");
+    int rc = 0;
+
+    char *charFilename = bdata(filename);
+    mu_assert(access(charFilename, F_OK) >= 0, "File does not exist in start of test_load test");
+
+    TestData expectedTstData;
+    TestData actualTstData;
+    bzero(&expectedTstData, sizeof(expectedTstData));
+    bzero(&actualTstData, sizeof(actualTstData));
+
+    FILE *fp = fopen(charFilename, "rb");
+    mu_assert(fp != NULL, "Failed to open file in start of test_load test");
+
+    rc = fread(&expectedTstData, sizeof(expectedTstData), 1, fp);
+    mu_assert(rc == 1, "Failed to read expected test data in start of test_load test");
+
+    fclose(fp);
+
+    ss_io_load(filename, &actualTstData, sizeof(actualTstData));
+    mu_assert(tstDataIsEq(expectedTstData, actualTstData) == true, "Loaded test data is not valid after ss_io_load");
+
+    rc = remove(bdata(filename));
+    mu_assert(rc == 0, "Failed to delete file after ss_io_load test");
+
     return NULL;
 }
 
