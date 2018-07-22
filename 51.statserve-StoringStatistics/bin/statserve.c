@@ -60,7 +60,7 @@ int process_cmd(int client_fd, SS_Stats *stats, char *cmdStr)
         errorMsg = bformat("Invalid command format.\n");
         rc = -1;
 
-        check(false, "Invalid command format. Closing connection");
+        check(false, "Invalid command format.");
     }
 
     rc = ss_controller_execute_cmd(client_fd, stats, cmd, execute_cmd_callback);

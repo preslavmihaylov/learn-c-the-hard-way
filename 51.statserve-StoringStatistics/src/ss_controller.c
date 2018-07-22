@@ -1,5 +1,6 @@
 #include <ss_controller.h>
 #include <lcthw/bstrlib.h>
+#include <ss_io.h>
 
 typedef int (*ss_controller_traverse_cb) (SS_Stats *stats, bstring originalKey, bstring currentKey, double value);
 
@@ -68,6 +69,20 @@ int ss_controller_execute_cmd(
             check(rc == 0, "Failed to sample %s for key %s", bdata(cmd->parm2), bdata(cmd->parm1));
 
             resultStr = bformat("Successfully sampled %s for key %s\n", bdata(cmd->parm2), bdata(cmd->parm1));
+            break;
+        }
+        case SS_CmdType_Store:
+        {
+            check(cmd->paramsCnt == 1, "Invalid params cnt for store cmd");
+
+            Stats *dumpedStats = ss_stats_dump(stats, cmd->parm1);
+            check(dumpedStats != NULL, "Failed to store stats for key %s", bdata(cmd->parm1));
+
+            rc = ss_io_store(cmd->parm1, dumpedStats, sizeof(*dumpedStats));
+            check(rc == 0, "Failed to store key %s", bdata(cmd->parm1));
+
+            resultStr = bformat("Successfully stored key %s\n", bdata(cmd->parm1));
+
             break;
         }
         case SS_CmdType_Exit:

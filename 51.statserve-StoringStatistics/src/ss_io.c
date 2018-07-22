@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <lcthw/dbg.h>
 
-void ss_io_store(bstring filename, void *data, uint32_t size)
+int ss_io_store(bstring filename, void *data, uint32_t size)
 {
     FILE *fp = fopen(bdata(filename), "w+");
     check(fp != NULL, "failed to open file");
@@ -12,11 +12,13 @@ void ss_io_store(bstring filename, void *data, uint32_t size)
 
     fclose(fp);
 
+    return 0;
+
 error: // fallthrough
-    return;
+    return -1;
 }
 
-void ss_io_load(bstring filename, void *buffer, uint32_t size)
+int ss_io_load(bstring filename, void *buffer, uint32_t size)
 {
     FILE *fp = fopen(bdata(filename), "r");
     check(fp != NULL, "failed to open file");
@@ -24,7 +26,9 @@ void ss_io_load(bstring filename, void *buffer, uint32_t size)
     int rc = fread(buffer, size, 1, fp);
     check(rc == 1, "failed to read file on ss_io_load");
 
+    return 0;
+
 error: // fallthrough
-    return;
+    return -1;
 }
 
