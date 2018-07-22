@@ -2,31 +2,31 @@
 
 SS_Stats *ss_stats_create()
 {
-    SS_Stats *stats = calloc(1, sizeof(SS_Stats));
-    check(stats != NULL, "Failed to create SS_Stats");
+    SS_Stats *statsRepo = calloc(1, sizeof(SS_Stats));
+    check(statsRepo != NULL, "Failed to create SS_Stats");
 
-    stats->data = Hashmap_create(NULL, NULL);
-    check(stats->data != NULL, "Failed to create Hashmap");
+    statsRepo->data = Hashmap_create(NULL, NULL);
+    check(statsRepo->data != NULL, "Failed to create Hashmap");
 
-    return stats;
+    return statsRepo;
 
 error:
     return NULL;
 }
 
-int ss_stats_add(SS_Stats *stats, bstring key)
+int ss_stats_add(SS_Stats *statsRepo, bstring key)
 {
-    check(stats != NULL, "ss_stats cannot be null");
-    check(stats->data != NULL, "ss_stats->data cannot be NULL");
+    check(statsRepo != NULL, "ss_stats cannot be null");
+    check(statsRepo->data != NULL, "ss_stats->data cannot be NULL");
     check(key != NULL, "key cannot be NULL");
 
-    void *val = Hashmap_get(stats->data, key);
-    check(val == NULL, "Key already exists in stats");
+    void *val = Hashmap_get(statsRepo->data, key);
+    check(val == NULL, "Key already exists in statsRepo");
 
     Stats *newStats = Stats_create();
     check_mem(newStats);
 
-    Hashmap_set(stats->data, key, newStats);
+    Hashmap_set(statsRepo->data, key, newStats);
 
     return 0;
 
@@ -34,14 +34,14 @@ error:
     return -1;
 }
 
-int ss_stats_mean(SS_Stats *stats, bstring key, double *mean)
+int ss_stats_mean(SS_Stats *statsRepo, bstring key, double *mean)
 {
-    check(stats != NULL, "stats cannot be NULL");
+    check(statsRepo != NULL, "statsRepo cannot be NULL");
     check(key != NULL, "key cannot be NULL");
 
-    Stats *currStats = Hashmap_get(stats->data, key);
-    check(currStats != NULL, "key does not exist in stats");
-    check(currStats->count > 0, "stats should have at least 1 element for calculating mean");
+    Stats *currStats = Hashmap_get(statsRepo->data, key);
+    check(currStats != NULL, "key does not exist in statsRepo");
+    check(currStats->count > 0, "statsRepo should have at least 1 element for calculating mean");
 
     *mean = Stats_mean(currStats);
 
@@ -51,25 +51,25 @@ error:
     return -1;
 }
 
-Stats *ss_stats_dump(SS_Stats *stats, bstring key)
+Stats *ss_stats_dump(SS_Stats *statsRepo, bstring key)
 {
-    check(stats != NULL, "stats cannot be NULL");
-    check(stats->data != NULL, "stats->data cannot be NULL");
+    check(statsRepo != NULL, "statsRepo cannot be NULL");
+    check(statsRepo->data != NULL, "statsRepo->data cannot be NULL");
     check(key != NULL, "key cannot be NULL");
 
-    return Hashmap_get(stats->data, key);
+    return Hashmap_get(statsRepo->data, key);
 
 error:
     return NULL;
 }
 
-int ss_stats_delete(SS_Stats *stats, bstring key)
+int ss_stats_delete(SS_Stats *statsRepo, bstring key)
 {
-    check(stats != NULL, "stats cannot be NULL");
+    check(statsRepo != NULL, "statsRepo cannot be NULL");
     check(key != NULL, "key cannot be NULL");
-    check(Hashmap_get(stats->data, key) != NULL, "key does not exist");
+    check(Hashmap_get(statsRepo->data, key) != NULL, "key does not exist");
 
-    void *data = Hashmap_delete(stats->data, key);
+    void *data = Hashmap_delete(statsRepo->data, key);
     check(data != NULL, "Hashmap failed to delete data");
     Stats_destroy((Stats *)data);
 
@@ -79,15 +79,13 @@ error:
     return -1;
 }
 
-int ss_stats_sample(SS_Stats *stats, bstring key, double sample)
+int ss_stats_sample(SS_Stats *statsRepo, bstring key, double sample)
 {
-    check(stats != NULL, "stats cannot be NULL");
+    check(statsRepo != NULL, "statsRepo cannot be NULL");
     check(key != NULL, "key cannot be NULL");
-    check(stats->data != NULL, "stats->data cannot be NULL");
+    check(statsRepo->data != NULL, "statsRepo->data cannot be NULL");
 
-    log_info("ss_stats_sample(%s, %.2f)", bdata(key), sample);
-
-    Stats *currStats = Hashmap_get(stats->data, key);
+    Stats *currStats = Hashmap_get(statsRepo->data, key);
     check(currStats != NULL, "key %s  does not exist", bdata(key));
 
     Stats_sample(currStats, sample);
@@ -98,9 +96,28 @@ error:
     return -1;
 }
 
-void ss_stats_traverse(SS_Stats *stats, ss_stats_traverse_cb cb)
+int ss_stats_set(SS_Stats *statsRepo, bstring key, Stats *stats)
 {
-    Hashmap_traverse(stats->data, (Hashmap_traverse_cb)cb);
+    check(statsRepo != NULL, "ss_stats cannot be null");
+    check(statsRepo->data != NULL, "ss_stats->data cannot be NULL");
+    check(key != NULL, "key cannot be NULL");
+    check(stats != NULL, "stats cannot be NULL");
+
+    // ignore error. We create a new key if it is non-existent
+    ss_stats_delete(statsRepo, key);
+
+    bool addedRecord = Hashmap_set(statsRepo->data, key, stats);
+    check(addedRecord == true, "Hashmap_set failed in ss_stats_set");
+
+    return 0;
+
+error:
+    return -1;
+}
+
+void ss_stats_traverse(SS_Stats *statsRepo, ss_stats_traverse_cb cb)
+{
+    Hashmap_traverse(statsRepo->data, (Hashmap_traverse_cb)cb);
 }
 
 static bool stats_destroy_cb(void *key, void *data)
@@ -109,13 +126,13 @@ static bool stats_destroy_cb(void *key, void *data)
     return true;
 }
 
-void ss_stats_destroy(SS_Stats *stats)
+void ss_stats_destroy(SS_Stats *statsRepo)
 {
-    if (stats)
+    if (statsRepo)
     {
-        Hashmap_traverse(stats->data, stats_destroy_cb);
-        if (stats->data) Hashmap_destroy(stats->data);
+        Hashmap_traverse(statsRepo->data, stats_destroy_cb);
+        if (statsRepo->data) Hashmap_destroy(statsRepo->data);
 
-        free(stats);
+        free(statsRepo);
     }
 }
