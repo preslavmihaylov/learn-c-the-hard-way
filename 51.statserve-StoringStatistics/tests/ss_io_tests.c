@@ -19,22 +19,18 @@ bool tstDataIsEq(TestData first, TestData second)
 char *test_store()
 {
     bstring filename = bfromcstr("testdat");
-    (void)filename;
-
     TestData tstDat = { .strDat = "Hello", .intDat = 1, .charDat = 'c', .floatDat = 3.14f };
-    (void)tstDat;
 
     ss_io_store(filename, (void *)&tstDat, sizeof(tstDat));
 
-    char *tmp = bdata(filename);
-    mu_assert(access(tmp, F_OK) >= 0, "File does not exist after ss_io_store");
+    char *charFilename = bdata(filename);
+    mu_assert(access(charFilename, F_OK) >= 0, "File does not exist after ss_io_store");
 
     TestData storedTstData;
-    FILE *fp = fopen(tmp, "rb");
+    FILE *fp = fopen(charFilename, "rb");
     mu_assert(fp != NULL, "Failed to open file after ss_io_store");
 
     fread(&storedTstData, sizeof(storedTstData), 1, fp);
-    log_info("%s %c %d %f", storedTstData.strDat, storedTstData.charDat, storedTstData.intDat, storedTstData.floatDat);
     mu_assert(tstDataIsEq(storedTstData, tstDat) == true, "Stored test data is not valid after ss_io_store");
 
     int rc = remove(bdata(filename));
