@@ -15,6 +15,7 @@ static int cmdParamsCnt[SS_CmdType_Count] =
     1, // SS_CmdType_Mean
     2, // SS_CmdType_Sample
     1, // SS_CmdType_Dump
+    1, // SS_CmdType_Store
     0, // SS_CmdType_Exit
 };
 
@@ -65,6 +66,12 @@ static SS_CmdType ss_command_getCmdType(struct bstrList *tokens)
         check(ss_command_isNumber(tokens->entry[2]), "Second Param for sample is expected to be numeric");
 
         return SS_CmdType_Sample;
+    }
+    else if (strcmp(firstEntry, "store") == 0)
+    {
+        check(tokens->qty == 1 + cmdParamsCnt[SS_CmdType_Store], "Invalid cmd length for store");
+
+        return SS_CmdType_Store;
     }
     else if (strcmp(firstEntry, "exit") == 0)
     {

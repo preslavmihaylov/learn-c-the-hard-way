@@ -182,6 +182,20 @@ char *test_parse()
         bdestroy(str);
     }
 
+    {
+        bstring str = bfromcstr("store abc");
+        bstring expectedParm1 = bfromcstr("abc");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res != NULL, "ss_command_parse unexpectedly returned NULL");
+        mu_assert(res->cmdType == SS_CmdType_Store, "Wrong cmd type");
+        mu_assert(bstrcmp(res->parm1, expectedParm1) == 0, "Wrong param 1 after store");
+
+        bdestroy(str);
+        bdestroy(expectedParm1);
+        ss_command_destroy(res);
+    }
+
     return NULL;
 }
 
