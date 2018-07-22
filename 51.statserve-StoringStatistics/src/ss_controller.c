@@ -17,6 +17,7 @@ int ss_controller_execute_cmd(
     int client_fd, SS_Stats *stats, SS_Command *cmd, ss_controller_result_cb resultCallback)
 {
     bstring resultStr = NULL;
+    bstring stringToAdd = NULL;
     int rc = 0;
 
     switch (cmd->cmdType)
@@ -25,7 +26,6 @@ int ss_controller_execute_cmd(
         {
             check(cmd->paramsCnt == 1, "Invalid params cnt for create cmd");
 
-            // remember to destroy key
             rc = ss_controller_create_key(stats, cmd->parm1);
             check(rc == 0, "Failed to add %s key to statistics", bdata(cmd->parm1));
 
@@ -64,7 +64,6 @@ int ss_controller_execute_cmd(
             check(cmd->paramsCnt == 2, "Invalid params cnt for sample cmd");
 
             char *parm2 = bdata(cmd->parm2);
-            //rc = ss_stats_sample(stats, cmd->parm1, atof(parm2));
             rc = ss_controller_sample_key(stats, cmd->parm1, atof(parm2));
             check(rc == 0, "Failed to sample %s for key %s", bdata(cmd->parm2), bdata(cmd->parm1));
 
@@ -82,7 +81,26 @@ int ss_controller_execute_cmd(
             check(rc == 0, "Failed to store key %s", bdata(cmd->parm1));
 
             resultStr = bformat("Successfully stored key %s\n", bdata(cmd->parm1));
+            break;
+        }
+        case SS_CmdType_Load:
+        {
+            check(cmd->paramsCnt == 1, "Invalid params cnt for store cmd");
 
+            Stats *loadedStats = Stats_create();
+            check_mem(loadedStats);
+
+            rc = ss_io_load(cmd->parm1, loadedStats, sizeof(*loadedStats));
+            check(rc == 0, "Failed to load stats for key %s", bdata(cmd->parm1));
+
+            rc = ss_controller_create_key(stats, cmd->parm1);
+            check(rc == 0, "Faield to create key before loading %s", bdata(cmd->parm1));
+
+            stringToAdd = bstrcpy(cmd->parm1);
+            rc = ss_stats_set(stats, stringToAdd, loadedStats);
+            check(rc == 0, "Failed to set new stats in statsRepo");
+
+            resultStr = bformat("Successfully loaded key %s\n", bdata(cmd->parm1));
             break;
         }
         case SS_CmdType_Exit:
@@ -107,6 +125,7 @@ int ss_controller_execute_cmd(
 
 error:
     if (resultStr) bdestroy(resultStr);
+    if (stringToAdd) bdestroy(stringToAdd);
 
     return -1;
 }
