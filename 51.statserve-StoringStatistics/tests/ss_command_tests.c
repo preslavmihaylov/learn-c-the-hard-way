@@ -177,7 +177,7 @@ char *test_parse()
         bstring str = bfromcstr("exit aaa");
 
         SS_Command *res = ss_command_parse(str);
-        mu_assert(res == NULL, "ss_command_parse expected to return NULL when dump command is invalid");
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when exit command is invalid");
 
         bdestroy(str);
     }
@@ -194,6 +194,15 @@ char *test_parse()
         bdestroy(str);
         bdestroy(expectedParm1);
         ss_command_destroy(res);
+    }
+
+    {
+        bstring str = bfromcstr("store aaa aaa");
+
+        SS_Command *res = ss_command_parse(str);
+        mu_assert(res == NULL, "ss_command_parse expected to return NULL when store command is invalid");
+
+        bdestroy(str);
     }
 
     return NULL;
