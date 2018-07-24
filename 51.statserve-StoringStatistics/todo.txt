@@ -1,5 +1,0 @@
-+ hashmap_set does not override previous data
-+ memory leak on load due to previous problem
-+ ss_stats_set tests
-+ hashmap is fixed size, make it dynamically reallocate
-+ darray is fixed size? If so, make it dynamically reallocate
