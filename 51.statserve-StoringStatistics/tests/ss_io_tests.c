@@ -17,6 +17,7 @@ bool tstDataIsEq(TestData first, TestData second)
 }
 
 static char *ioFilename = "/tmp/asd";
+static char *hashedFilename = "iocadjma";
 static TestData tstDat = { .strDat = "Hello", .intDat = 1, .charDat = 'c', .floatDat = 3.14f };
 
 char *test_store()
@@ -53,7 +54,7 @@ char *test_load()
     ss_io_load(filename, &actualTstData, sizeof(actualTstData));
     mu_assert(tstDataIsEq(expectedTstData, actualTstData) == true, "Loaded test data is not valid after ss_io_load");
 
-    rc = remove(bdata(filename));
+    rc = remove(hashedFilename);
     mu_assert(rc == 0, "Failed to delete file after ss_io_load test");
 
     return NULL;
