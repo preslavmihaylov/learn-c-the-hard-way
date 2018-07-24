@@ -55,7 +55,7 @@ void Hashmap_destroy(Hashmap *map)
     free(map);
 }
 
-bool Hashmap_set(Hashmap *map, void *key, void *data)
+void *Hashmap_set(Hashmap *map, void *key, void *data)
 {
     check(map != NULL, "Map cannot be NULL");
     check(map->buckets != NULL, "Map buckets cannot be NULL");
@@ -70,16 +70,33 @@ bool Hashmap_set(Hashmap *map, void *key, void *data)
         bucket = DArray_create(sizeof(void*), 5);
         DArray_set(map->buckets, index, bucket);
     }
+    else
+    {
+        // find currently assigned data to key and change it
+        for (uint32_t i = 0; i < DArray_count(bucket); ++i)
+        {
+            HashmapNode *node = DArray_get(bucket, i);
+            check(node != NULL, "DArray returned NULL element");
+
+            if (map->compare(node->key, key) == 0)
+            {
+                void *oldData = node->data;
+                node->data = data;
+
+                return oldData;
+            }
+        }
+    }
 
     HashmapNode *node = HashmapNode_create(key, data);
     check_mem(node);
 
     DArray_push(bucket, node);
 
-    return true;
+    return data;
 
 error:
-    return false;
+    return NULL;
 }
 
 void *Hashmap_get(Hashmap *map, void *key)
