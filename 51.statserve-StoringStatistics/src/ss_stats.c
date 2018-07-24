@@ -16,6 +16,9 @@ error:
 
 int ss_stats_add(SS_Stats *statsRepo, bstring key)
 {
+    Stats *newStats = NULL;
+    Stats *oldStats = NULL;
+
     check(statsRepo != NULL, "ss_stats cannot be null");
     check(statsRepo->data != NULL, "ss_stats->data cannot be NULL");
     check(key != NULL, "key cannot be NULL");
@@ -23,14 +26,18 @@ int ss_stats_add(SS_Stats *statsRepo, bstring key)
     void *val = Hashmap_get(statsRepo->data, key);
     check(val == NULL, "Key already exists in statsRepo");
 
-    Stats *newStats = Stats_create();
+    newStats = Stats_create();
     check_mem(newStats);
 
-    Hashmap_set(statsRepo->data, key, newStats);
+    oldStats = Hashmap_set(statsRepo->data, key, newStats);
+    check(oldStats == newStats, "Unexpected overwrite of value when using ss_stats_add");
 
     return 0;
 
 error:
+    if (newStats) Stats_destroy(newStats);
+    if (oldStats) Stats_destroy(oldStats);
+
     return -1;
 }
 
@@ -104,10 +111,12 @@ int ss_stats_set(SS_Stats *statsRepo, bstring key, Stats *stats)
     check(stats != NULL, "stats cannot be NULL");
 
     // ignore error. We create a new key if it is non-existent
-    ss_stats_delete(statsRepo, key);
+    //ss_stats_delete(statsRepo, key);
 
-    bool addedRecord = Hashmap_set(statsRepo->data, key, stats);
-    check(addedRecord == true, "Hashmap_set failed in ss_stats_set");
+    Stats *oldRecord = Hashmap_set(statsRepo->data, key, stats);
+    check(oldRecord != NULL, "Hashmap_set unexpectedly failed in ss_stats_set");
+
+    if (oldRecord != stats) Stats_destroy(oldRecord);
 
     return 0;
 
