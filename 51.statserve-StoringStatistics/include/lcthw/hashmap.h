@@ -28,7 +28,10 @@ typedef bool (*Hashmap_traverse_cb) (void *key, void *data);
 Hashmap *Hashmap_create(Hashmap_compare compare, Hashmap_hash hash);
 void Hashmap_destroy(Hashmap *map);
 
-bool Hashmap_set(Hashmap *map, void *key, void *data);
+/*
+ * returns previously set value if key is already set OR returns newly set value if key was not set
+ */
+void *Hashmap_set(Hashmap *map, void *key, void *data);
 void *Hashmap_get(Hashmap *map, void *key);
 
 bool Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb);
